@@ -260,7 +260,7 @@ export function SectionFour() {
         </div>
 
         <div className="bg-white">
-          {works.map((work, index) => (
+          {works.map((work) => (
             <div key={work.title} className="flex flex-col">
               <div className="flex h-8 border-b border-[#ff3f32]/55">
                 <div className="w-6 border-r border-[#ff3f32]/55" />
