@@ -189,7 +189,7 @@ export function SectionFour() {
               ref={trackRef}
               className="flex h-full w-max items-center will-change-transform"
             >
-              {works.map((work, index) => (
+              {works.map((work) => (
                 <div
                   key={work.title}
                   className="h-full flex flex-row items-center"
