@@ -273,14 +273,18 @@ export function SectionFour() {
 
                 <article className="grid min-w-0 flex-1 grid-rows-[auto_auto] overflow-hidden border-b border-[#ff3f32]/55 bg-white text-[#ff3f32]">
                   <div className="relative aspect-square overflow-hidden">
-                    <div className="absolute left-5 top-5 z-10 text-xs font-black uppercase tracking-[0.22em] text-[#ff3f32]">
-                      {(index + 1).toString().padStart(2, "0")}
-                    </div>
-
-                    <img
+                    <WebGLBlurImage
                       src={work.imageSrc}
                       alt={work.title}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover cursor-zoom-in"
+                      pixelSize={16}
+                      blurStrength={3.5}
+                      glassStrength={0.3}
+                      noiseStrength={0.1}
+                      noiseScale={520}
+                      revealRadius={0.14}
+                      revealSoftness={0.18}
+                      objectFit="cover"
                     />
                   </div>
 
