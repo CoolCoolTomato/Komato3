@@ -1,3 +1,4 @@
+import { AppPreloader } from "@/components/app-preloader"
 import { FullScreenScroll } from "@/components/full-screen-scroll"
 import { SectionFive } from "@/components/sections/section-five"
 import { SectionFour } from "@/components/sections/section-four"
@@ -7,13 +8,15 @@ import { SectionTwo } from "@/components/sections/section-two"
 
 export function App() {
   return (
-    <FullScreenScroll>
-      <SectionOne />
-      <SectionTwo />
-      <SectionThree />
-      <SectionFour />
-      <SectionFive />
-    </FullScreenScroll>
+    <AppPreloader>
+      <FullScreenScroll>
+        <SectionOne />
+        <SectionTwo />
+        <SectionThree />
+        <SectionFour />
+        <SectionFive />
+      </FullScreenScroll>
+    </AppPreloader>
   )
 }
 
