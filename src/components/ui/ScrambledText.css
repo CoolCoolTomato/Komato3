@@ -1,0 +1,9 @@
+.text-block .char {
+  display: inline-block;
+  white-space: pre;
+  will-change: contents;
+}
+
+.text-block p {
+  margin: 0;
+}
