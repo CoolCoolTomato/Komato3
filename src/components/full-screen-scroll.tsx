@@ -215,6 +215,26 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
     }
 
     const handleWheel = (event: WheelEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.closest("[data-scroll-lock='true']")
+      ) {
+        event.preventDefault()
+        event.stopPropagation()
+        event.stopImmediatePropagation()
+        clearSnapTimeout()
+
+        if (scrollAnimationFrameRef.current) {
+          window.cancelAnimationFrame(scrollAnimationFrameRef.current)
+          scrollAnimationFrameRef.current = undefined
+        }
+
+        currentScrollTopRef.current = container.scrollTop
+        targetScrollTopRef.current = container.scrollTop
+        isDampedScrollingRef.current = false
+        return
+      }
+
       event.preventDefault()
       clearSnapTimeout()
 

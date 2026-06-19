@@ -1,5 +1,9 @@
-import { useRef, useState } from "react"
+import { Environment, useGLTF } from "@react-three/drei"
+import { Canvas, useFrame } from "@react-three/fiber"
+import { useEffect, useMemo, useRef, useState, Suspense } from "react"
 import { ArrowUpRight, X } from "lucide-react"
+import type { Group, Object3D } from "three"
+import { Box3, Mesh, Vector3 } from "three"
 
 import {
   BilibiliIcon,
@@ -9,7 +13,310 @@ import {
   TelegramIcon,
   TwitterIcon,
 } from "@/components/icons"
+import nightEnvironmentUrl from "@/assets/dikhololo_night_1k.hdr?url"
 import { SectionTitleBand } from "@/components/sections/section-title-band"
+
+function isMesh(object: Object3D): object is Mesh {
+  return "isMesh" in object && object.isMesh === true
+}
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max)
+
+type TomatoRotation = {
+  x: number
+  y: number
+}
+
+function ContactTomatoModel({
+  rotationRef,
+  scaleRef,
+  isDraggingRef,
+}: {
+  rotationRef: React.RefObject<TomatoRotation>
+  scaleRef: React.RefObject<number>
+  isDraggingRef: React.RefObject<boolean>
+}) {
+  const groupRef = useRef<Group>(null)
+  const { scene } = useGLTF("/tomato.glb")
+
+  const tomatoScene = useMemo(() => {
+    const clone = scene.clone(true)
+
+    clone.traverse((child) => {
+      if (isMesh(child)) {
+        if (Array.isArray(child.material)) {
+          child.material = child.material.map((material) => material.clone())
+        } else {
+          child.material = child.material.clone()
+        }
+
+        child.castShadow = true
+        child.receiveShadow = true
+      }
+    })
+
+    const box = new Box3().setFromObject(clone)
+    const center = box.getCenter(new Vector3())
+    const size = box.getSize(new Vector3())
+    const maxAxis = Math.max(size.x, size.y, size.z)
+
+    clone.position.sub(center)
+    clone.scale.setScalar(maxAxis > 0 ? 2.45 / maxAxis : 1)
+
+    return clone
+  }, [scene])
+
+  useFrame((_, delta) => {
+    const group = groupRef.current
+
+    if (!group) {
+      return
+    }
+
+    if (!isDraggingRef.current) {
+      rotationRef.current.y += delta * 0.42
+    }
+
+    group.rotation.x += (rotationRef.current.x - group.rotation.x) * 0.12
+    group.rotation.y += (rotationRef.current.y - group.rotation.y) * 0.12
+    group.scale.setScalar(
+      group.scale.x + (scaleRef.current - group.scale.x) * 0.12,
+    )
+  })
+
+  return (
+    <group ref={groupRef} position={[0, -0.12, 0]}>
+      <primitive object={tomatoScene} />
+    </group>
+  )
+}
+
+function ContactTomatoCanvas() {
+  const [isReady, setIsReady] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const revealFrameRef = useRef<number | undefined>(undefined)
+  const rotationRef = useRef<TomatoRotation>({ x: 0.12, y: -0.35 })
+  const scaleRef = useRef(1)
+  const isDraggingRef = useRef(false)
+  const dragRef = useRef({
+    pointerId: -1,
+    x: 0,
+    y: 0,
+  })
+
+  useEffect(() => {
+    const root = rootRef.current
+
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault()
+      event.stopPropagation()
+      event.stopImmediatePropagation()
+      scaleRef.current = clamp(scaleRef.current - event.deltaY * 0.001, 0.78, 1.9)
+    }
+
+    root?.addEventListener("wheel", handleWheel, {
+      capture: true,
+      passive: false,
+    })
+
+    return () => {
+      root?.removeEventListener("wheel", handleWheel, {
+        capture: true,
+      })
+
+      if (revealFrameRef.current) {
+        window.cancelAnimationFrame(revealFrameRef.current)
+      }
+    }
+  }, [])
+
+  return (
+    <div
+      ref={rootRef}
+      data-scroll-lock="true"
+      className="relative h-full min-h-0 w-full cursor-grab overflow-hidden overscroll-contain bg-white touch-none active:cursor-grabbing"
+      aria-label="Interactive tomato model"
+      onPointerDown={(event) => {
+        isDraggingRef.current = true
+        dragRef.current = {
+          pointerId: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+        }
+        event.currentTarget.setPointerCapture(event.pointerId)
+      }}
+      onPointerMove={(event) => {
+        if (!isDraggingRef.current || dragRef.current.pointerId !== event.pointerId) {
+          return
+        }
+
+        const deltaX = event.clientX - dragRef.current.x
+        const deltaY = event.clientY - dragRef.current.y
+
+        rotationRef.current.y += deltaX * 0.008
+        rotationRef.current.x = clamp(
+          rotationRef.current.x + deltaY * 0.006,
+          -0.85,
+          0.85,
+        )
+        dragRef.current.x = event.clientX
+        dragRef.current.y = event.clientY
+      }}
+      onPointerUp={(event) => {
+        isDraggingRef.current = false
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId)
+        }
+      }}
+      onPointerCancel={(event) => {
+        isDraggingRef.current = false
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId)
+        }
+      }}
+    >
+      <Canvas
+        className={`bg-white transition-opacity duration-300 ${
+          isReady ? "opacity-100" : "opacity-0"
+        }`}
+        camera={{ position: [0, 0.1, 4.4], fov: 34 }}
+        dpr={[1, 2]}
+        gl={{ alpha: false, antialias: true }}
+        onCreated={({ gl }) => {
+          gl.setClearColor("#ffffff", 1)
+          gl.domElement.style.backgroundColor = "#ffffff"
+          revealFrameRef.current = window.requestAnimationFrame(() => {
+            setIsReady(true)
+          })
+        }}
+      >
+        <Suspense fallback={null}>
+          <color attach="background" args={["#ffffff"]} />
+          <ambientLight intensity={0.9} />
+          <directionalLight position={[3, 4, 5]} intensity={2.4} />
+          <pointLight position={[-3, -2, 3]} color="#ff3f32" intensity={4} />
+          <ContactTomatoModel
+            rotationRef={rotationRef}
+            scaleRef={scaleRef}
+            isDraggingRef={isDraggingRef}
+          />
+          <Environment files={nightEnvironmentUrl} />
+        </Suspense>
+      </Canvas>
+    </div>
+  )
+}
+
+function ContactAside() {
+  const rootRef = useRef<HTMLElement>(null)
+  const [grid, setGrid] = useState({
+    left: 48,
+    right: 320,
+    top: 64,
+    bottom: 336,
+  })
+
+  useEffect(() => {
+    const root = rootRef.current
+
+    if (!root) {
+      return
+    }
+
+    const observer = new ResizeObserver(([entry]) => {
+      if (!entry) {
+        return
+      }
+
+      const width = entry.contentRect.width
+      const height = entry.contentRect.height
+      const isCompact = width < 520 || height < 420
+      const minSideEdge = isCompact ? 24 : 36
+      const minTopEdge = isCompact ? 20 : 42
+      const minBottomEdge = isCompact ? 76 : 132
+      const centerSize = Math.max(
+        1,
+        Math.min(width - minSideEdge * 2, height - minTopEdge - minBottomEdge),
+      )
+      const left = (width - centerSize) / 2
+      const topBottomSpace = Math.max(height - centerSize, 0)
+      const bottomSpace = clamp(
+        topBottomSpace * 0.58,
+        minBottomEdge,
+        Math.max(topBottomSpace - minTopEdge, minBottomEdge),
+      )
+      const top = Math.max(topBottomSpace - bottomSpace, 0)
+
+      setGrid({
+        left,
+        right: left + centerSize,
+        top,
+        bottom: top + centerSize,
+      })
+    })
+
+    observer.observe(root)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
+  const centerSize = grid.right - grid.left
+
+  return (
+    <aside
+      ref={rootRef}
+      className="relative min-h-0 overflow-hidden border-b border-[#ff3f32]/55 bg-white md:border-b-0 md:border-r"
+    >
+      <div
+        className="pointer-events-none absolute bottom-0 top-0 z-20 border-l border-[#ff3f32]/25"
+        style={{ left: grid.left }}
+      />
+      <div
+        className="pointer-events-none absolute bottom-0 top-0 z-20 border-l border-[#ff3f32]/25"
+        style={{ left: grid.right }}
+      />
+      <div
+        className="pointer-events-none absolute left-0 right-0 z-20 border-t border-[#ff3f32]/25"
+        style={{ top: grid.top }}
+      />
+      <div
+        className="pointer-events-none absolute left-0 right-0 z-20 border-t border-[#ff3f32]/25"
+        style={{ top: grid.bottom }}
+      />
+
+      <div className="absolute left-6 top-5 z-10 h-3 w-24 bg-[#ff3f32] md:left-7 md:top-8" />
+
+      <div
+        className="absolute z-10"
+        style={{
+          left: grid.left,
+          top: grid.top,
+          width: centerSize,
+          height: centerSize,
+        }}
+      >
+        <ContactTomatoCanvas />
+      </div>
+
+      <div
+        className="absolute z-10 flex items-end px-4 pb-5 pt-4 md:px-6 md:pb-8"
+        style={{
+          left: grid.left,
+          right: `calc(100% - ${grid.right}px)`,
+          top: grid.bottom,
+          bottom: 0,
+        }}
+      >
+        <p className="max-w-[22ch] text-[clamp(1.05rem,4.8vw,1.55rem)] font-medium leading-[1.12] tracking-[-0.05em] md:max-w-[16ch] md:text-[clamp(1.9rem,2.15vw,2.65rem)]">
+          Open to projects, ideas, bugs, games, and strange experiments.
+        </p>
+      </div>
+    </aside>
+  )
+}
 
 const contactItems = [
   {
@@ -89,23 +396,7 @@ export function SectionFive() {
         />
 
         <main className="grid h-[95svh] grid-rows-[32%_1fr] md:h-[90svh] md:grid-cols-[33%_1fr] md:grid-rows-none">
-          {/* Left intro */}
-          <aside className="flex min-h-0 flex-col justify-between border-b border-[#ff3f32]/55 px-6 py-5 md:border-b-0 md:border-r md:px-7 md:pb-11 md:pt-8">
-            <div className="h-3 w-24 bg-[#ff3f32]" />
-
-            <div>
-              <p className="mb-3 text-xs font-black uppercase tracking-[0.22em] md:mb-6 md:text-sm">
-                Let&apos;s Build
-              </p>
-              <h2 className="max-w-[8ch] text-[clamp(3.1rem,15vw,5.2rem)] font-black leading-[0.88] tracking-[-0.06em] md:text-[clamp(4.5rem,7vw,8.5rem)]">
-                With Tomato
-              </h2>
-            </div>
-
-            <p className="max-w-[22ch] text-[clamp(1.05rem,4.8vw,1.55rem)] font-medium leading-[1.12] tracking-[-0.05em] md:max-w-[13ch] md:text-[clamp(1.9rem,2.15vw,2.65rem)]">
-              Open to projects, ideas, bugs, games, and strange experiments.
-            </p>
-          </aside>
+          <ContactAside />
 
           {/* Contact cards */}
           <div className="relative min-h-0 overflow-hidden">
@@ -233,3 +524,5 @@ export function SectionFive() {
     </section>
   )
 }
+
+useGLTF.preload("/tomato.glb")
