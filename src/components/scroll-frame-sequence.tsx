@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
+
+import { getCachedImage, preloadImage } from "@/lib/image-cache"
 
 type ScrollFrameSequenceProps = {
   frameCount: number
@@ -37,10 +39,50 @@ export function ScrollFrameSequence({
   scrollRootRef,
 }: ScrollFrameSequenceProps) {
   const rootRef = useRef<HTMLDivElement>(null)
-  const [frame, setFrame] = useState(1)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const frameRef = useRef(1)
   const progressRef = useRef(0)
   const targetProgressRef = useRef(0)
   const animationFrameRef = useRef<number | undefined>(undefined)
+  const resizeObserverRef = useRef<ResizeObserver | undefined>(undefined)
+
+  const drawFrame = (frame: number) => {
+    const canvas = canvasRef.current
+    const root = rootRef.current
+    const image = getCachedImage(getFrameSrc(frame))
+
+    if (!canvas || !root || !image) {
+      return
+    }
+
+    const rect = root.getBoundingClientRect()
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const width = Math.max(1, Math.round(rect.width * dpr))
+    const height = Math.max(1, Math.round(rect.height * dpr))
+
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width
+      canvas.height = height
+    }
+
+    const context = canvas.getContext("2d")
+
+    if (!context) {
+      return
+    }
+
+    context.clearRect(0, 0, width, height)
+
+    const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight)
+    const drawWidth = image.naturalWidth * scale
+    const drawHeight = image.naturalHeight * scale
+    const drawX = (width - drawWidth) / 2
+    const drawY = (height - drawHeight) / 2
+
+    context.imageSmoothingEnabled = true
+    context.imageSmoothingQuality = "high"
+    context.drawImage(image, drawX, drawY, drawWidth, drawHeight)
+  }
 
   useEffect(() => {
     const root = rootRef.current
@@ -59,7 +101,12 @@ export function ScrollFrameSequence({
       const setFrameFromProgress = (progress: number) => {
         const nextFrame = Math.round(progress * (frameCount - 1)) + 1
 
-        setFrame(nextFrame)
+        if (nextFrame === frameRef.current) {
+          return
+        }
+
+        frameRef.current = nextFrame
+        drawFrame(nextFrame)
       }
 
       const animateFrameProgress = () => {
@@ -102,6 +149,13 @@ export function ScrollFrameSequence({
       updateFrameFromScroll()
       progressRef.current = targetProgressRef.current
       setFrameFromProgress(progressRef.current)
+      drawFrame(frameRef.current)
+
+      resizeObserverRef.current = new ResizeObserver(() => {
+        drawFrame(frameRef.current)
+      })
+      resizeObserverRef.current.observe(root)
+
       animationFrameRef.current =
         window.requestAnimationFrame(animateFrameProgress)
       container.addEventListener("scroll", updateFrameFromScroll, {
@@ -114,31 +168,58 @@ export function ScrollFrameSequence({
           window.cancelAnimationFrame(animationFrameRef.current)
         }
 
+        resizeObserverRef.current?.disconnect()
         container.removeEventListener("scroll", updateFrameFromScroll)
         window.removeEventListener("resize", updateFrameFromScroll)
       }
     }
 
-  }, [frameCount, scrollRootRef])
+  }, [frameCount, getFrameSrc, scrollRootRef])
 
   useEffect(() => {
-    const preloadFrames = [frame - 1, frame + 1].filter(
-      (nextFrame) => nextFrame >= 1 && nextFrame <= frameCount,
-    )
+    let isMounted = true
+    let cursor = 1
+    let active = 0
+    const concurrency = 8
 
-    preloadFrames.forEach((nextFrame) => {
-      const image = new Image()
-      image.src = getFrameSrc(nextFrame)
-    })
-  }, [frame, frameCount, getFrameSrc])
+    const runNext = () => {
+      if (!isMounted) {
+        return
+      }
+
+      while (active < concurrency && cursor <= frameCount) {
+        const frame = cursor
+        cursor += 1
+        active += 1
+
+        preloadImage(getFrameSrc(frame))
+          .then(() => {
+            if (frame === frameRef.current) {
+              drawFrame(frame)
+            }
+          })
+          .catch(() => undefined)
+          .finally(() => {
+            active -= 1
+            runNext()
+          })
+      }
+    }
+
+    runNext()
+
+    return () => {
+      isMounted = false
+    }
+  }, [frameCount, getFrameSrc])
 
   return (
     <div ref={rootRef} className={className}>
-      <img
-        src={getFrameSrc(frame)}
-        alt={alt}
-        className="h-full w-full object-contain"
-        draggable={false}
+      <canvas
+        ref={canvasRef}
+        role="img"
+        aria-label={alt}
+        className="block h-full w-full"
       />
     </div>
   )

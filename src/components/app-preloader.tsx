@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 
 import nightEnvironmentUrl from "@/assets/dikhololo_night_1k.hdr?url"
+import { preloadImage } from "@/lib/image-cache"
 
 const minimumSplashDuration = 2400
 const preloadConcurrency = 10
@@ -45,27 +46,6 @@ let preloadProgress = {
 function wait(duration: number) {
   return new Promise<void>((resolve) => {
     window.setTimeout(resolve, duration)
-  })
-}
-
-function preloadImage(src: string) {
-  return new Promise<void>((resolve, reject) => {
-    const image = new Image()
-
-    image.onload = () => {
-      if (!image.decode) {
-        resolve()
-        return
-      }
-
-      image.decode().then(resolve).catch(resolve)
-    }
-
-    image.onerror = () => {
-      reject(new Error(`Failed to load ${src}`))
-    }
-
-    image.src = src
   })
 }
 
