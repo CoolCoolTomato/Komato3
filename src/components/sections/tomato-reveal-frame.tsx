@@ -10,6 +10,7 @@ const revealStartProgress = 0.25
 const imageInset = 30
 const imageStartScale = 1.5
 const revealDamping = 0.3
+const tomatoFrameCount = 137
 
 type TomatoRevealFrameProps = {
   scrollRootRef: React.RefObject<HTMLElement | null>
@@ -166,7 +167,7 @@ export function TomatoRevealFrame({ scrollRootRef }: TomatoRevealFrameProps) {
           }}
         >
           <ScrollFrameSequence
-            frameCount={274}
+            frameCount={tomatoFrameCount}
             getFrameSrc={getTomatoFrameSrc}
             alt="Tomato frame animation"
             className="h-full w-full"

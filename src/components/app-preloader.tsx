@@ -4,7 +4,7 @@ import nightEnvironmentUrl from "@/assets/dikhololo_night_1k.hdr?url"
 
 const minimumSplashDuration = 2400
 const preloadConcurrency = 10
-const tomatoFrameCount = 274
+const tomatoFrameCount = 137
 
 type AppPreloaderProps = {
   children: ReactNode
