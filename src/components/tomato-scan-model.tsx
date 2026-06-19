@@ -1,6 +1,6 @@
 import { Environment, useGLTF } from "@react-three/drei"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { Suspense, useCallback, useMemo, useRef, useState } from "react"
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { Group, Object3D } from "three"
 import { Box3, Color, Mesh, MeshPhysicalMaterial, Vector3 } from "three"
 import nightEnvironmentUrl from "@/assets/dikhololo_night_1k.hdr?url"
@@ -87,12 +87,32 @@ function TomatoScene({ materialMode }: { materialMode: TomatoMaterialMode }) {
 }
 
 function TomatoCanvas({ materialMode }: { materialMode: TomatoMaterialMode }) {
+  const [isReady, setIsReady] = useState(false)
+  const revealFrameRef = useRef<number | undefined>(undefined)
+
+  useEffect(() => {
+    return () => {
+      if (revealFrameRef.current) {
+        window.cancelAnimationFrame(revealFrameRef.current)
+      }
+    }
+  }, [])
+
   return (
     <Canvas
-      className="pointer-events-none"
+      className={`pointer-events-none bg-white transition-opacity duration-300 ${
+        isReady ? "opacity-100" : "opacity-0"
+      }`}
       camera={{ position: [0, 0.15, 4.3], fov: 34 }}
       dpr={[1, 2]}
       gl={{ alpha: false, antialias: true }}
+      onCreated={({ gl }) => {
+        gl.setClearColor("#ffffff", 1)
+        gl.domElement.style.backgroundColor = "#ffffff"
+        revealFrameRef.current = window.requestAnimationFrame(() => {
+          setIsReady(true)
+        })
+      }}
     >
       <Suspense fallback={null}>
         <TomatoScene materialMode={materialMode} />
