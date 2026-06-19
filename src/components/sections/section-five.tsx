@@ -97,7 +97,7 @@ function ContactTomatoCanvas() {
   const rootRef = useRef<HTMLDivElement>(null)
   const revealFrameRef = useRef<number | undefined>(undefined)
   const rotationRef = useRef<TomatoRotation>({ x: 0.12, y: -0.35 })
-  const scaleRef = useRef(1)
+  const scaleRef = useRef(0.9)
   const isDraggingRef = useRef(false)
   const dragRef = useRef({
     pointerId: -1,
@@ -215,6 +215,7 @@ function ContactAside() {
     right: 320,
     top: 64,
     bottom: 336,
+    isHorizontal: false,
   })
 
   useEffect(() => {
@@ -231,6 +232,34 @@ function ContactAside() {
 
       const width = entry.contentRect.width
       const height = entry.contentRect.height
+      const isMobileLayout = width > height
+
+      if (isMobileLayout) {
+        const minLeftEdge = 18
+        const minRightEdge = Math.max(120, width * 0.34)
+        const minVerticalEdge = 16
+        const centerSize = Math.max(
+          1,
+          Math.min(height - minVerticalEdge * 2, width - minLeftEdge - minRightEdge),
+        )
+        const top = (height - centerSize) / 2
+        const sideSpace = Math.max(width - centerSize, 0)
+        const left = clamp(
+          sideSpace * 0.34,
+          minLeftEdge,
+          Math.max(sideSpace - minRightEdge, minLeftEdge),
+        )
+
+        setGrid({
+          left,
+          right: left + centerSize,
+          top,
+          bottom: top + centerSize,
+          isHorizontal: true,
+        })
+        return
+      }
+
       const isCompact = width < 520 || height < 420
       const minSideEdge = isCompact ? 24 : 36
       const minTopEdge = isCompact ? 20 : 42
@@ -253,6 +282,7 @@ function ContactAside() {
         right: left + centerSize,
         top,
         bottom: top + centerSize,
+        isHorizontal: false,
       })
     })
 
@@ -302,12 +332,12 @@ function ContactAside() {
       </div>
 
       <div
-        className="absolute z-10 flex items-end px-4 pb-5 pt-4 md:px-6 md:pb-8"
+        className="absolute z-10 flex items-center px-4 py-4 md:items-end md:px-6 md:pb-8"
         style={{
-          left: grid.left,
-          right: `calc(100% - ${grid.right}px)`,
-          top: grid.bottom,
-          bottom: 0,
+          left: grid.isHorizontal ? grid.right : grid.left,
+          right: grid.isHorizontal ? 0 : `calc(100% - ${grid.right}px)`,
+          top: grid.isHorizontal ? grid.top : grid.bottom,
+          bottom: grid.isHorizontal ? `calc(100% - ${grid.bottom}px)` : 0,
         }}
       >
         <p className="max-w-[22ch] text-[clamp(1.05rem,4.8vw,1.55rem)] font-medium leading-[1.12] tracking-[-0.05em] md:max-w-[16ch] md:text-[clamp(1.9rem,2.15vw,2.65rem)]">
