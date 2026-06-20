@@ -317,8 +317,6 @@ function ContactAside() {
         style={{ top: grid.bottom }}
       />
 
-      <div className="absolute left-6 top-5 z-10 h-3 w-24 bg-[#ff3f32] md:left-7 md:top-8" />
-
       <div
         className="absolute z-10"
         style={{
