@@ -8,7 +8,7 @@ import {
   useState,
 } from "react"
 import type { Group, Object3D } from "three"
-import { Box3, Mesh, PerspectiveCamera, Vector3 } from "three"
+import { Box3, Mesh, PerspectiveCamera, Vector3, MeshLambertMaterial, Color } from "three"
 
 import nightEnvironmentUrl from "@/assets/dikhololo_night_1k.hdr?url"
 
@@ -87,14 +87,12 @@ function HackerModel({ progress }: { progress: number }) {
         return
       }
 
-      if (Array.isArray(child.material)) {
-        child.material = child.material.map((material) => material.clone())
-      } else {
-        child.material = child.material.clone()
-      }
+      child.material = new MeshLambertMaterial({
+        color: new Color("#202020"),
+      })
 
-      child.castShadow = true
-      child.receiveShadow = true
+      child.castShadow = false
+      child.receiveShadow = false
     })
 
     const box = new Box3().setFromObject(clone)
@@ -154,31 +152,46 @@ function CameraRig({ progress }: { progress: number }) {
       (progressRef.current - easedProgressRef.current) * 0.075
 
     const p = easedProgressRef.current
-    const orbitAngle =
-      -1.05 +
-      p * Math.PI * 1.72 +
-      Math.sin(p * Math.PI * 2.4) * 0.22
-    const radius = 5.65 - p * 3.22 + Math.sin(p * Math.PI) * 0.28
-    const height = 1.35 - p * 0.34 + Math.sin(p * Math.PI * 1.6) * 0.16
-    const sideDrift = Math.sin(p * Math.PI * 2.1) * 0.82
+    const ease = (t: number) => 1 - Math.pow(1 - t, 3)
+
+    const s = ease(p)
+
+    /**
+     * 只增不减：镜头永远朝一个方向绕
+     * 如果最后不是正脸，只改 endAngle
+     */
+    const startAngle = -1.05
+    const endAngle = startAngle + Math.PI * 2.4
+
+    const orbitAngle = startAngle + (endAngle - startAngle) * s
+
+    const radius = 5.8 - s * 3.65
+    const height = 1.45 - s * 0.42
 
     cameraTargetRef.current.set(
-      Math.sin(orbitAngle) * radius + sideDrift,
+      Math.sin(orbitAngle) * radius,
       height,
       Math.cos(orbitAngle) * radius,
     )
+
     cameraPositionRef.current.copy(camera.position)
     cameraPositionRef.current.lerp(cameraTargetRef.current, 0.08)
     camera.position.copy(cameraPositionRef.current)
 
+    /**
+     * lookAt 也不要来回摆动，平滑上移到脸
+     */
     lookAtRef.current.set(
-      Math.sin(p * Math.PI * 1.35) * 0.32,
-      0.5 + p * 0.24,
-      Math.cos(p * Math.PI * 1.8) * 0.16,
+      0,
+      0.68 + s * 0.28,
+      0,
     )
+
     camera.lookAt(lookAtRef.current)
+
     if (camera instanceof PerspectiveCamera) {
-      camera.fov += (34 - p * 10 - camera.fov) * 0.08
+      const targetFov = 36 - s * 13
+      camera.fov += (targetFov - camera.fov) * 0.08
       camera.updateProjectionMatrix()
     }
   })
@@ -192,30 +205,36 @@ function HackerCanvas({ progress }: { progress: number }) {
       camera={{ position: [-3.5, 1.22, 4.1], fov: 34 }}
       dpr={[1, 2]}
       gl={{ alpha: true, antialias: true }}
-      shadows
     >
       <Suspense fallback={null}>
-        <color attach="background" args={["#050706"]} />
-        <fog attach="fog" args={["#050706", 4.2, 8.8]} />
-        <ambientLight intensity={0.7} />
+        <color attach="background" args={["#000000"]} />
+        <fog attach="fog" args={["#101010", 6, 12]} />
+
+        <ambientLight intensity={0.85} />
+
         <directionalLight
-          castShadow
-          position={[3.6, 4.4, 3.2]}
-          intensity={2.8}
-          shadow-mapSize={[1024, 1024]}
+          position={[3, 4, 4]}
+          intensity={1.8}
         />
-        <pointLight position={[-2.8, 1.1, 2.2]} color="#a6ff4d" intensity={4.2} />
-        <pointLight position={[2.4, 0.6, -2.2]} color="#00ffc2" intensity={2.8} />
+
+        <directionalLight
+          position={[-4, 2, -3]}
+          color="#7CFF41"
+          intensity={0.9}
+        />
+
         <HackerModel progress={progress} />
-        <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.98, 0]}>
+
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.98, 0]}>
           <circleGeometry args={[3.4, 96]} />
-          <meshStandardMaterial color="#070a08" roughness={0.8} metalness={0.15} />
+          <meshBasicMaterial color="#070a08" />
         </mesh>
+
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.965, 0]}>
           <ringGeometry args={[1.05, 1.08, 128]} />
-          <meshBasicMaterial color="#b8ff62" transparent opacity={0.48} />
+          <meshBasicMaterial color="#7CFF41" transparent opacity={0.25} />
         </mesh>
-        <Environment files={nightEnvironmentUrl} />
+
         <CameraRig progress={progress} />
       </Suspense>
     </Canvas>
@@ -229,7 +248,7 @@ export function HackModePage() {
   return (
     <main
       ref={rootRef}
-      className="relative min-h-[460svh] bg-[#050706]"
+      className="relative min-h-[500svh] bg-[#050706]"
     >
       <div className="sticky top-0 h-svh overflow-hidden">
         <div className="absolute inset-0">
