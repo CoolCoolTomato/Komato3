@@ -2,21 +2,16 @@ import { useEffect, useRef, useState } from "react"
 
 import { HackerBackground } from "@/components/hack/hacker-background"
 
+const screenAnchors = [0, 1, 2]
+const secondScreenProgress = 0.25
+const thirdScreenProgress = 1
+const anchorScrollDuration = 700
+
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max)
 
-// Adjust these three progress anchors to freeze the 3D scene at specific poses.
-const progressAnchors = [0, 0.25, 1]
-const anchorScrollDuration = 900
-
-function getProgressMetrics(root: HTMLElement) {
-  const rootTop = root.getBoundingClientRect().top + window.scrollY
-  const scrollableDistance = Math.max(root.offsetHeight - window.innerHeight, 1)
-
-  return {
-    rootTop,
-    scrollableDistance,
-  }
+function getRootTop(root: HTMLElement) {
+  return root.getBoundingClientRect().top + window.scrollY
 }
 
 function easeInOutCubic(value: number) {
@@ -25,57 +20,21 @@ function easeInOutCubic(value: number) {
     : 1 - Math.pow(-2 * value + 2, 3) / 2
 }
 
-function usePageProgress(rootRef: React.RefObject<HTMLElement | null>) {
-  const [progress, setProgress] = useState(0)
+function getProgressFromAnchor(anchorIndex: number) {
+  if (anchorIndex <= 0) {
+    return 0
+  }
 
-  useEffect(() => {
-    let frame = 0
+  if (anchorIndex === 1) {
+    return secondScreenProgress
+  }
 
-    const update = () => {
-      frame = 0
-
-      const root = rootRef.current
-
-      if (!root) {
-        return
-      }
-
-      const { rootTop, scrollableDistance } = getProgressMetrics(root)
-      const nextProgress = clamp(
-        (window.scrollY - rootTop) / scrollableDistance,
-        0,
-        1,
-      )
-
-      setProgress(nextProgress)
-    }
-
-    const requestUpdate = () => {
-      if (frame) {
-        return
-      }
-
-      frame = window.requestAnimationFrame(update)
-    }
-
-    update()
-    window.addEventListener("scroll", requestUpdate, { passive: true })
-    window.addEventListener("resize", requestUpdate)
-
-    return () => {
-      if (frame) {
-        window.cancelAnimationFrame(frame)
-      }
-
-      window.removeEventListener("scroll", requestUpdate)
-      window.removeEventListener("resize", requestUpdate)
-    }
-  }, [rootRef])
-
-  return progress
+  return thirdScreenProgress
 }
 
-function useAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
+function useHackAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
+  const [progress, setProgress] = useState(0)
+  const currentAnchorRef = useRef(0)
   const animationFrameRef = useRef<number | null>(null)
   const isAnimatingRef = useRef(false)
 
@@ -95,14 +54,17 @@ function useAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
       isAnimatingRef.current = false
     }
 
-    const scrollToAnchor = (targetProgress: number) => {
-      const { rootTop, scrollableDistance } = getProgressMetrics(root)
+    const scrollToAnchor = (nextAnchor: number) => {
+      const rootTop = getRootTop(root)
+      const viewportHeight = Math.max(window.innerHeight, 1)
       const startY = window.scrollY
-      const targetY = rootTop + scrollableDistance * targetProgress
+      const targetY = rootTop + nextAnchor * viewportHeight
       const startTime = performance.now()
 
       cancelAnimation()
       isAnimatingRef.current = true
+      currentAnchorRef.current = nextAnchor
+      setProgress(getProgressFromAnchor(nextAnchor))
 
       const animate = (currentTime: number) => {
         const elapsed = currentTime - startTime
@@ -124,6 +86,24 @@ function useAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
       animationFrameRef.current = window.requestAnimationFrame(animate)
     }
 
+    const syncAnchorFromScroll = () => {
+      if (isAnimatingRef.current) {
+        return
+      }
+
+      const rootTop = getRootTop(root)
+      const viewportHeight = Math.max(window.innerHeight, 1)
+      const scrollInRoot = Math.max(window.scrollY - rootTop, 0)
+      const nextAnchor = clamp(
+        Math.round(scrollInRoot / viewportHeight),
+        0,
+        screenAnchors.length - 1,
+      )
+
+      currentAnchorRef.current = nextAnchor
+      setProgress(getProgressFromAnchor(nextAnchor))
+    }
+
     const handleWheel = (event: WheelEvent) => {
       if (!root.contains(event.target as Node)) {
         return
@@ -135,57 +115,49 @@ function useAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
         return
       }
 
-      const { rootTop, scrollableDistance } = getProgressMetrics(root)
-      const currentProgress = clamp(
-        (window.scrollY - rootTop) / scrollableDistance,
-        0,
-        1,
-      )
-      const currentIndex = progressAnchors.reduce(
-        (closestIndex, anchor, index) => {
-          const closestDistance = Math.abs(
-            progressAnchors[closestIndex] - currentProgress,
-          )
-          const currentDistance = Math.abs(anchor - currentProgress)
+      const direction = event.deltaY > 0 ? 1 : event.deltaY < 0 ? -1 : 0
 
-          return currentDistance < closestDistance ? index : closestIndex
-        },
-        0,
-      )
-
-      const direction = event.deltaY > 0 ? 1 : -1
-      const targetIndex = clamp(
-        currentIndex + direction,
-        0,
-        progressAnchors.length - 1,
-      )
-
-      if (targetIndex === currentIndex) {
+      if (direction === 0) {
         return
       }
 
-      scrollToAnchor(progressAnchors[targetIndex])
+      const nextAnchor = clamp(
+        currentAnchorRef.current + direction,
+        0,
+        screenAnchors.length - 1,
+      )
+
+      if (nextAnchor === currentAnchorRef.current) {
+        return
+      }
+
+      scrollToAnchor(nextAnchor)
     }
 
+    syncAnchorFromScroll()
+    window.addEventListener("scroll", syncAnchorFromScroll, { passive: true })
     window.addEventListener("wheel", handleWheel, { passive: false })
+    window.addEventListener("resize", syncAnchorFromScroll)
 
     return () => {
       cancelAnimation()
+      window.removeEventListener("scroll", syncAnchorFromScroll)
       window.removeEventListener("wheel", handleWheel)
+      window.removeEventListener("resize", syncAnchorFromScroll)
     }
   }, [rootRef])
+
+  return progress
 }
 
 export function HackModePage() {
   const rootRef = useRef<HTMLElement>(null)
-  const progress = usePageProgress(rootRef)
-
-  useAnchorScroll(rootRef)
+  const progress = useHackAnchorScroll(rootRef)
 
   return (
     <main
       ref={rootRef}
-      className="relative min-h-[500svh] bg-[#050706]"
+      className="relative min-h-[300svh] bg-[#050706]"
     >
       <div className="sticky top-0 h-svh overflow-hidden">
         <div className="absolute inset-0">
