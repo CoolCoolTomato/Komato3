@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react"
 
 import { HackerBackground } from "@/components/hack/hacker-background"
+import { HackSectionOne } from "@/components/hack/hack-section-one"
+import { HackSectionThree } from "@/components/hack/hack-section-three"
+import { HackSectionTwo } from "@/components/hack/hack-section-two"
 
 const screenAnchors = [0, 1, 2]
 const secondScreenProgress = 0.25
@@ -159,10 +162,17 @@ export function HackModePage() {
       ref={rootRef}
       className="relative min-h-[300svh] bg-[#050706]"
     >
-      <div className="sticky top-0 h-svh overflow-hidden">
-        <div className="absolute inset-0">
-          <HackerBackground progress={progress} />
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <div className="sticky top-0 h-svh overflow-hidden">
+          <div className="absolute inset-0">
+            <HackerBackground progress={progress} />
+          </div>
         </div>
+      </div>
+      <div className="relative z-10">
+        <HackSectionOne />
+        <HackSectionTwo />
+        <HackSectionThree />
       </div>
     </main>
   )
