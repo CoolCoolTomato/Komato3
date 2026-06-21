@@ -1,5 +1,5 @@
-import { BlogMosaicCanvas } from "@/components/sections/blog-mosaic-canvas"
-import { SectionTitleBand } from "@/components/sections/section-title-band"
+import { BlogMosaicCanvas } from "@/components/tomato/blog-mosaic-canvas"
+import { SectionTitleBand } from "@/components/tomato/section-title-band"
 import { ArrowRight, ArrowUpRight, X } from "lucide-react"
 import { useState } from "react"
 import ScrambledText from '../ui/ScrambledText';

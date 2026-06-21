@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 
-import { ScrollFrameSequence } from "@/components/scroll-frame-sequence"
+import { ScrollFrameSequence } from "@/components/tomato/scroll-frame-sequence"
 import { clamp, getScrollContainer } from "@/lib/scroll"
 
 const getTomatoFrameSrc = (frame: number) =>

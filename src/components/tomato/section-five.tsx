@@ -14,7 +14,7 @@ import {
   TwitterIcon,
 } from "@/components/icons"
 import nightEnvironmentUrl from "@/assets/dikhololo_night_1k.hdr?url"
-import { SectionTitleBand } from "@/components/sections/section-title-band"
+import { SectionTitleBand } from "@/components/tomato/section-title-band"
 
 function isMesh(object: Object3D): object is Mesh {
   return "isMesh" in object && object.isMesh === true

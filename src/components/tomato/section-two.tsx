@@ -1,8 +1,8 @@
 import { useRef } from "react"
 
-import { SectionTitleBand } from "@/components/sections/section-title-band"
-import { StickyInfoList } from "@/components/sections/sticky-info-list"
-import { TomatoRevealFrame } from "@/components/sections/tomato-reveal-frame"
+import { SectionTitleBand } from "@/components/tomato/section-title-band"
+import { StickyInfoList } from "@/components/tomato/sticky-info-list"
+import { TomatoRevealFrame } from "@/components/tomato/tomato-reveal-frame"
 
 export function SectionTwo() {
   const scrollRootRef = useRef<HTMLElement>(null)

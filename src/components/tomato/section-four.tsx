@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import WebGLBlurImage from "../web-gl-blue-img"
+import WebGLBlurImage from "./web-gl-blue-img"
 
 const works = [
     {

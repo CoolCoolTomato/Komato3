@@ -1,4 +1,4 @@
-import { TomatoScanModel } from "@/components/tomato-scan-model"
+import { TomatoScanModel } from "@/components/tomato/tomato-scan-model"
 
 export function SectionOne() {
   return (
