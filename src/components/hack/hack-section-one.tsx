@@ -31,10 +31,9 @@ export function HackSectionOne() {
           </p>
 
           <div className="flex flex-col items-center gap-3">
-            <span className="text-[10px] font-black uppercase tracking-[0.28em] text-[#ff3f32]/55">
-              Scroll
+            <span className="text-[10px] font-black uppercase tracking-[0.28em] text-[#ff3f32]/55 bottom-16 relative">
+              Q29vbENvb2xUb21hdG8
             </span>
-            <div className="h-12 w-px bg-[#ff3f32]/40" />
           </div>
         </footer>
       </div>
