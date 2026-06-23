@@ -30,11 +30,11 @@ function getCodeRainColumns() {
     "fork",
   ]
 
-  return Array.from({ length: 18 }, (_, index) => {
+  return Array.from({ length: 20 }, (_, index) => {
     const left = 4 + pseudoRandom(index + 1) * 92
     const duration = 8 + pseudoRandom(index + 7) * 8
     const delay = -pseudoRandom(index + 13) * 12
-    const opacity = 0.28 + pseudoRandom(index + 19) * 0.34
+    const opacity = 0.3 + pseudoRandom(index + 19) * 0.34
 
     const text = Array.from({ length: 36 }, (_, lineIndex) => {
       const tokenIndex =
