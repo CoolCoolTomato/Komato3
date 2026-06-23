@@ -4,6 +4,10 @@ import { HackerBackground } from "@/components/hack/hacker-background"
 import { HackSectionOne } from "@/components/hack/hack-section-one"
 import { HackSectionThree } from "@/components/hack/hack-section-three"
 import { HackSectionTwo } from "@/components/hack/hack-section-two"
+import {
+  HackTransitionOverlay,
+  type HackTransitionPhase,
+} from "@/components/hack/hack-transition-overlay"
 
 const screenAnchors = [0, 1, 2]
 const secondScreenProgress = 0.25
@@ -32,7 +36,7 @@ function getProgressFromAnchor(anchorIndex: number) {
   return thirdScreenProgress
 }
 
-type TransitionPhase = "idle" | "exiting" | "entering"
+type TransitionPhase = HackTransitionPhase
 
 function useHackAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
   const [progress, setProgress] = useState(0)
@@ -40,6 +44,7 @@ function useHackAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
   const [fromAnchor, setFromAnchor] = useState(0)
   const [toAnchor, setToAnchor] = useState(0)
   const [phase, setPhase] = useState<TransitionPhase>("idle")
+  const [transitionProgress, setTransitionProgress] = useState(1)
 
   const currentAnchorRef = useRef(0)
   const animationFrameRef = useRef<number | null>(null)
@@ -91,6 +96,7 @@ function useHackAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
 
       setFromAnchor(prevAnchor)
       setToAnchor(nextAnchor)
+      setTransitionProgress(0)
       setPhase("exiting")
 
       exitTimerRef.current = window.setTimeout(() => {
@@ -99,6 +105,7 @@ function useHackAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
         setPhase("entering")
 
         enterTimerRef.current = window.setTimeout(() => {
+          setTransitionProgress(1)
           setPhase("idle")
         }, sectionEnterDuration)
       }, sectionExitDuration)
@@ -109,9 +116,11 @@ function useHackAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
         const easedTime = easeInOutCubic(normalizedTime)
         const nextY = startY + (targetY - startY) * easedTime
 
+        setTransitionProgress(easedTime)
         window.scrollTo(0, nextY)
 
         if (normalizedTime >= 1) {
+          setTransitionProgress(1)
           window.scrollTo(0, targetY)
           cancelAnimation()
           return
@@ -141,6 +150,7 @@ function useHackAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
       setFromAnchor(nextAnchor)
       setToAnchor(nextAnchor)
       setPhase("idle")
+      setTransitionProgress(1)
       setProgress(getProgressFromAnchor(nextAnchor))
     }
 
@@ -184,6 +194,7 @@ function useHackAnchorScroll(rootRef: React.RefObject<HTMLElement | null>) {
     fromAnchor,
     toAnchor,
     phase,
+    transitionProgress,
   }
 }
 
@@ -243,8 +254,14 @@ function SectionLayer({
 export function HackModePage() {
   const rootRef = useRef<HTMLElement>(null)
 
-  const { progress, activeAnchor, fromAnchor, toAnchor, phase } =
-    useHackAnchorScroll(rootRef)
+  const {
+    progress,
+    activeAnchor,
+    fromAnchor,
+    toAnchor,
+    phase,
+    transitionProgress,
+  } = useHackAnchorScroll(rootRef)
 
   return (
     <main ref={rootRef} className="relative min-h-[300svh] bg-[#050706]">
@@ -253,6 +270,18 @@ export function HackModePage() {
           <div className="absolute inset-0">
             <HackerBackground progress={progress} />
           </div>
+        </div>
+      </div>
+
+      <div className="pointer-events-none absolute inset-0 z-[5]">
+        <div className="sticky top-0 h-svh overflow-hidden">
+          <HackTransitionOverlay
+            activeAnchor={activeAnchor}
+            fromAnchor={fromAnchor}
+            toAnchor={toAnchor}
+            phase={phase}
+            transitionProgress={transitionProgress}
+          />
         </div>
       </div>
 
