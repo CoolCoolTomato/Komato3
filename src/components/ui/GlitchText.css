@@ -1,5 +1,5 @@
 .glitch {
-  color: #fff;
+  color: #ff3f32;
   font-size: clamp(2rem, 10vw, 8rem);
   font-weight: 900;
   position: relative;
@@ -14,15 +14,15 @@
   content: attr(data-text);
   position: absolute;
   top: 0;
-  color: #fff;
-  background-color: #120F17;
+  color: #ff3f32;
+  background-color: #000000;
   overflow: hidden;
   clip-path: inset(0 0 0 0);
 }
 
 .glitch:not(.enable-on-hover)::after {
   left: 10px;
-  text-shadow: var(--after-shadow, -10px 0 red);
+  text-shadow: var(--after-shadow, -10px 0 black);
   animation: animate-glitch var(--after-duration, 3s) infinite linear alternate-reverse;
 }
 .glitch:not(.enable-on-hover)::before {
