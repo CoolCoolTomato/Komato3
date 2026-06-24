@@ -17,10 +17,6 @@ export function HackSectionOne() {
           <h1 className="text-xs font-black uppercase tracking-[0.36em] text-[#ff3f32] ml-10">
             CoolCoolTomato
           </h1>
-
-          <span className="hidden text-[10px] font-black uppercase tracking-[0.28em] text-[#ff3f32]/45 md:block mr-10">
-            Hack Mode
-          </span>
         </header>
 
         <div />
