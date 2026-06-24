@@ -1,6 +1,6 @@
+import { HackAnchorTwo } from "./hack-anchor-two"
+import { HackAnchorThree } from "./hack-anchor-three"
 import { HackAnchorOne } from "./hack-anchor-one"
-import { HackAnchorTwo } from ".//hack-anchor-two"
-import { HackAnchorZero } from "./hack-anchor-zero"
 import { clamp, type HackTransitionPhase } from "./shared"
 
 export type { HackTransitionPhase } from "./shared"
@@ -90,17 +90,17 @@ export function HackTransitionOverlay({
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <HackAnchorZero
+      <HackAnchorOne
         opacity={anchorZeroOpacity}
         dissolveProgress={anchorZeroDissolveProgress}
       />
 
-      <HackAnchorOne
+      <HackAnchorTwo
         circleProgress={anchorOneCircleProgress}
         phase={phase}
       />
 
-      <HackAnchorTwo />
+      <HackAnchorThree />
     </div>
   )
 }
