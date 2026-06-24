@@ -7,7 +7,7 @@ import { HackSectionTwo } from "@/components/hack/hack-section-two"
 import {
   HackTransitionOverlay,
   type HackTransitionPhase,
-} from "@/components/hack/hack-transition-overlay"
+} from "@/components/hack/background-transition/hack-transition-overlay"
 
 import { Power } from "lucide-react"
 
