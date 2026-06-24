@@ -6,6 +6,7 @@ import { clamp, type HackTransitionPhase } from "./shared"
 export type { HackTransitionPhase } from "./shared"
 
 const circleEnterDelay = 0.32
+const lineEnterDelay = 0.12
 
 function delayedProgress(value: number, delay: number) {
   if (value <= delay) return 0
@@ -33,7 +34,7 @@ function getOverlayValues({
       anchorZeroOpacity: activeAnchor === 0 ? 0.38 : 0,
       anchorZeroDissolveProgress: activeAnchor === 0 ? 0 : 1,
       anchorOneCircleProgress: activeAnchor === 1 ? 1 : 0,
-      anchorTwoOpacity: activeAnchor === 2 ? 1 : 0,
+      anchorThreeLineProgress: activeAnchor === 2 ? 1 : 0,
     }
   }
 
@@ -51,15 +52,21 @@ function getOverlayValues({
     anchorOneCircleProgress = 1
   }
 
-  const anchorTwoFrom = fromAnchor === 2 ? 1 : 0
-  const anchorTwoTo = toAnchor === 2 ? 1 : 0
-  const anchorTwoPresence = anchorTwoFrom + (anchorTwoTo - anchorTwoFrom) * t
+  let anchorThreeLineProgress = 0
+
+  if (fromAnchor === 2 && toAnchor !== 2) {
+    anchorThreeLineProgress = 1 - t
+  } else if (fromAnchor !== 2 && toAnchor === 2) {
+    anchorThreeLineProgress = delayedProgress(t, lineEnterDelay)
+  } else if (fromAnchor === 2 && toAnchor === 2) {
+    anchorThreeLineProgress = 1
+  }
 
   return {
     anchorZeroOpacity: clamp(0.38 * anchorZeroPresence, 0, 1),
     anchorZeroDissolveProgress: clamp(1 - anchorZeroPresence, 0, 1),
     anchorOneCircleProgress: clamp(anchorOneCircleProgress, 0, 1),
-    anchorTwoOpacity: clamp(anchorTwoPresence, 0, 1),
+    anchorThreeLineProgress: clamp(anchorThreeLineProgress, 0, 1),
   }
 }
 
@@ -80,6 +87,7 @@ export function HackTransitionOverlay({
     anchorZeroOpacity,
     anchorZeroDissolveProgress,
     anchorOneCircleProgress,
+    anchorThreeLineProgress,
   } = getOverlayValues({
     activeAnchor,
     fromAnchor,
@@ -100,7 +108,10 @@ export function HackTransitionOverlay({
         phase={phase}
       />
 
-      <HackAnchorThree />
+      <HackAnchorThree
+        lineProgress={anchorThreeLineProgress}
+        phase={phase}
+      />
     </div>
   )
 }
