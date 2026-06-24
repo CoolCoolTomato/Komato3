@@ -8,17 +8,17 @@ type WordLine = {
 }
 
 const leftLines: WordLine[] = [
-  { text: "TOMATO", variant: "strong" },
-  { text: "ICE", variant: "strong" },
-  { text: "FULL STACK", variant: "soft" },
-  { text: "WEB DEV", variant: "soft" },
+  { text: "CYBER", variant: "strong" },
+  { text: "SECURITY", variant: "strong" },
+  { text: "PENETRATION", variant: "soft" },
+  { text: "TESTING", variant: "soft" },
 ]
 
 const rightLines: WordLine[] = [
-  { text: "CYBER", variant: "strong" },
-  { text: "LINUX", variant: "soft" },
-  { text: "AI TOOLS", variant: "soft" },
-  { text: "OPEN SOURCE", variant: "soft" },
+  { text: "EXPLOIT", variant: "strong" },
+  { text: "OFFENSIVE", variant: "strong" },
+  { text: "FULL STACK", variant: "soft" },
+  { text: "RESEARCH", variant: "soft" },
 ]
 
 function cx(...classes: Array<string | false | undefined | null>) {
@@ -52,12 +52,10 @@ function GlitchWord({
 
 function CopyBlock({
   side,
-  kicker,
   lines,
   desc,
 }: {
   side: "left" | "right"
-  kicker: string
   lines: WordLine[]
   desc: string
 }) {
@@ -68,7 +66,6 @@ function CopyBlock({
         side === "left" ? "hack-copyBlock--left" : "hack-copyBlock--right",
       )}
     >
-      <p className="hack-copyBlock__kicker">{kicker}</p>
 
       <div className="hack-copyBlock__words">
         {lines.map((line) => (
@@ -131,18 +128,16 @@ export function HackSectionTwo() {
       <div className="hack-section-two__layout">
         <CopyBlock
           side="left"
-          kicker="SYSTEM PROFILE"
           lines={leftLines}
-          desc="Building sharp interfaces, technical systems, and experimental web experiences."
+          desc="Discovering vulnerabilities, hardening systems, and exploring offensive security through practical testing."
         />
 
         <div className="hack-section-two__safe" aria-hidden="true" />
 
         <CopyBlock
           side="right"
-          kicker="FOCUS AREAS"
           lines={rightLines}
-          desc="Software engineering, cybersecurity, Linux systems, modern web, and AI applications."
+          desc="Offensive security research across exploits, systems, and full-stack applications."
         />
       </div>
 
@@ -518,6 +513,7 @@ export function HackSectionTwo() {
             grid-row: 1;
             align-self: start;
             text-align: left;
+            transform: translateY(-2svh);
           }
 
           .hack-copyBlock--right {
@@ -525,6 +521,7 @@ export function HackSectionTwo() {
             grid-row: 3;
             align-self: end;
             text-align: right;
+            transform: translateY(-6svh);
           }
 
           .hack-word--strong {

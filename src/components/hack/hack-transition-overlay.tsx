@@ -663,7 +663,7 @@ export function HackTransitionOverlay({
       <div
         className="absolute left-1/2 top-1/2 aspect-square -translate-x-1/2 -translate-y-1/2"
         style={{
-          width: "clamp(280px, min(58vw, 68svh), 620px)",
+          width: "clamp(320px, min(58vw, 68svh), 620px)",
           opacity: clamp(circleProgress * 1.25, 0, 1),
         }}
       >
