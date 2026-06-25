@@ -276,7 +276,7 @@ export function HackModePage() {
       onClick={switchToTomatoMode}
         type="button"
         aria-label="Power off"
-        className="fixed cursor-pointer right-25 top-7 z-9999 flex h-10 w-10 items-center justify-center rounded-full border border-[#ff3f32]/45 bg-[#050706]/70 text-[#ff3f32] shadow-[0_0_24px_rgba(255,63,50,0.18)] backdrop-blur-md transition hover:border-[#ff3f32]/80 hover:bg-[#ff3f32]/10 hover:shadow-[0_0_34px_rgba(255,63,50,0.32)] active:scale-95"
+        className="fixed cursor-pointer right-7 md:right-25 top-7 z-9999 flex h-10 w-10 items-center justify-center rounded-full border border-[#ff3f32]/45 bg-[#050706]/70 text-[#ff3f32] shadow-[0_0_24px_rgba(255,63,50,0.18)] backdrop-blur-md transition hover:border-[#ff3f32]/80 hover:bg-[#ff3f32]/10 hover:shadow-[0_0_34px_rgba(255,63,50,0.32)] active:scale-95"
       >
         <Power className="h-5 w-5" strokeWidth={2} />
       </button>
