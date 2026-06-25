@@ -49,7 +49,7 @@ function switchToHackMode() {
 }
 
 export function HackEntrySection(_: HackEntrySectionProps) {
-  const label = "Enter Hack Mode"
+  const label = "Second Personality"
 
   return (
     <section className="relative h-[100px] min-h-[100px] w-full overflow-hidden bg-black text-white">
@@ -58,7 +58,7 @@ export function HackEntrySection(_: HackEntrySectionProps) {
         onClick={switchToHackMode}
         data-scroll-snap-lock="true"
         className="hack-entry-panel group relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden text-center"
-        aria-label="Enter hack mode"
+        aria-label="Second Personality"
       >
         <span aria-hidden="true" className="hack-entry-core" />
 
