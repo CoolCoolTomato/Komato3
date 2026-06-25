@@ -237,21 +237,6 @@ export function HackPreloader({ children }: HackPreloaderProps) {
             willChange: "transform, opacity, filter",
           }}
         >
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              opacity: isExiting ? 0.2 : 0.7,
-              transition: "opacity 500ms ease",
-              willChange: "opacity",
-            }}
-          >
-            <div className="absolute inset-x-0 top-0 h-24 border-b border-[#ff3f32]/20" />
-            <div className="absolute inset-x-0 bottom-0 h-24 border-t border-[#ff3f32]/20" />
-            <div className="absolute left-0 top-0 h-full w-8 border-r border-[#ff3f32]/20 md:w-16" />
-            <div className="absolute right-0 top-0 h-full w-8 border-l border-[#ff3f32]/20 md:w-16" />
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,63,50,0.06)_1px,transparent_1px)] bg-[length:100%_18px] opacity-30" />
-          </div>
-
           <div className="relative z-10 flex flex-col items-center gap-5">
             <p
               className="text-[clamp(3.5rem,16vw,9rem)] font-black leading-none tracking-[-0.08em] drop-shadow-[0_0_24px_rgba(255,63,50,0.28)]"
