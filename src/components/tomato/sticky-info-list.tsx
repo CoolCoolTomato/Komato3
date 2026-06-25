@@ -7,6 +7,7 @@ import {
   SecurityIcon,
 } from "@/components/icons"
 import { clamp, getScrollContainer } from "@/lib/scroll"
+import { GlitchButton } from "./hack-button"
 
 const stickyListItems = [
   {
@@ -35,6 +36,11 @@ const mobileStickyTitleOffset = 65
 
 type StickyInfoListProps = {
   scrollRootRef: React.RefObject<HTMLElement | null>
+}
+
+function switchToHackMode() {
+  window.localStorage.setItem("mode", "hack")
+  window.location.reload()
 }
 
 export function StickyInfoList({ scrollRootRef }: StickyInfoListProps) {
@@ -132,6 +138,11 @@ export function StickyInfoList({ scrollRootRef }: StickyInfoListProps) {
                         {item.subtitle}
                       </p>
                     </div>
+                    {index === 3 && 
+                      <div className="left-[60%] top-5 relative">
+                        <GlitchButton onClick={switchToHackMode}>Enter</GlitchButton>
+                      </div>
+                    }
                   </div>
                   <div className="flex items-start justify-center px-2 py-3">
                     <item.Icon className="size-9 text-current" />
@@ -173,6 +184,11 @@ export function StickyInfoList({ scrollRootRef }: StickyInfoListProps) {
                       {item.subtitle}
                     </p>
                   </div>
+                  {index === 3 && 
+                    <div className="left-[70%] top-20 relative">
+                      <GlitchButton onClick={switchToHackMode}>Enter</GlitchButton>
+                    </div>
+                  }
                 </div>
                 <div className="flex items-start justify-center px-4 py-4">
                   <item.Icon className="size-12 text-white xl:size-14" />
