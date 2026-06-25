@@ -1,4 +1,4 @@
-import { Children, type ReactNode, useEffect, useRef } from "react"
+import { Children, isValidElement, type ReactNode, useEffect, useRef } from "react"
 
 const boundarySnapDelay = 200
 
@@ -8,6 +8,7 @@ const snapBoundaries = [
   [1, 2],
   [2, 3],
   [3, 4],
+  [4, 5],
 ] as const
 
 // SectionThree -> SectionFour 视差区间
@@ -25,6 +26,13 @@ type FullScreenScrollProps = {
   children: ReactNode
 }
 
+function isCompactSection(section: ReactNode) {
+  return (
+    isValidElement<{ compactScrollSection?: boolean }>(section) &&
+    section.props.compactScrollSection === true
+  )
+}
+
 export function FullScreenScroll({ children }: FullScreenScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const snapTimeoutRef = useRef<number | undefined>(undefined)
@@ -34,6 +42,7 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
   const targetScrollTopRef = useRef(0)
   const scrollDampingRef = useRef(wheelScrollDamping)
   const isDampedScrollingRef = useRef(false)
+  const isSnapLockedByHoverRef = useRef(false)
 
   const sectionRefs = useRef<Array<HTMLElement | null>>([])
 
@@ -152,6 +161,10 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
     }
 
     const snapSectionBoundary = () => {
+      if (isSnapLockedByHoverRef.current) {
+        return
+      }
+
       const viewportTop = container.scrollTop
       const viewportHeight = container.clientHeight
 
@@ -208,10 +221,45 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
       }
 
       clearSnapTimeout()
+
+      if (isSnapLockedByHoverRef.current) {
+        return
+      }
+
       snapTimeoutRef.current = window.setTimeout(
         snapSectionBoundary,
         boundarySnapDelay,
       )
+    }
+
+    const handlePointerOver = (event: PointerEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.closest("[data-scroll-snap-lock='true']")
+      ) {
+        isSnapLockedByHoverRef.current = true
+        clearSnapTimeout()
+      }
+    }
+
+    const handlePointerOut = (event: PointerEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.closest("[data-scroll-snap-lock='true']") &&
+        !(event.relatedTarget instanceof HTMLElement &&
+          event.relatedTarget.closest("[data-scroll-snap-lock='true']"))
+      ) {
+        isSnapLockedByHoverRef.current = false
+        clearSnapTimeout()
+        snapTimeoutRef.current = window.setTimeout(
+          snapSectionBoundary,
+          boundarySnapDelay,
+        )
+      }
+    }
+
+    const handlePointerLeave = () => {
+      isSnapLockedByHoverRef.current = false
     }
 
     const handleWheel = (event: WheelEvent) => {
@@ -263,6 +311,13 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
 
     container.addEventListener("scroll", handleScroll, { passive: true })
     container.addEventListener("wheel", handleWheel, { passive: false })
+    container.addEventListener("pointerover", handlePointerOver, {
+      passive: true,
+    })
+    container.addEventListener("pointerout", handlePointerOut, {
+      passive: true,
+    })
+    container.addEventListener("pointerleave", handlePointerLeave)
 
     window.addEventListener("resize", updateParallax)
 
@@ -277,6 +332,9 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
 
       container.removeEventListener("scroll", handleScroll)
       container.removeEventListener("wheel", handleWheel)
+      container.removeEventListener("pointerover", handlePointerOver)
+      container.removeEventListener("pointerout", handlePointerOut)
+      container.removeEventListener("pointerleave", handlePointerLeave)
       window.removeEventListener("resize", updateParallax)
     }
   }, [sections.length])
@@ -295,7 +353,9 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
               sectionRefs.current[index] = el
             }}
             className={[
-              "min-h-svh w-full shrink-0 [&>*]:min-h-svh",
+              isCompactSection(section)
+                ? "w-full shrink-0"
+                : "min-h-svh w-full shrink-0 [&>*]:min-h-svh",
               index === parallaxFromIndex
                 ? "relative z-20"
                 : "",

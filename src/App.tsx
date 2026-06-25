@@ -2,6 +2,7 @@ import { AppPreloader } from "@/components/app-preloader"
 import { FullScreenScroll } from "@/components/full-screen-scroll"
 import { HackModePage } from "@/components/hack/hack-mode-page"
 import { HackPreloader } from "@/components/hack/hack-preloader"
+import { HackEntrySection } from "@/components/tomato/hack-entry-section"
 import { SectionFive } from "@/components/tomato/section-five"
 import { SectionFour } from "@/components/tomato/section-four"
 import { SectionOne } from "@/components/tomato/section-one"
@@ -52,6 +53,7 @@ export function App() {
         <SectionThree />
         <SectionFour />
         <SectionFive />
+        <HackEntrySection compactScrollSection />
       </FullScreenScroll>
     </AppPreloader>
   )
