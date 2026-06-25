@@ -1,6 +1,7 @@
 import { AppPreloader } from "@/components/app-preloader"
 import { FullScreenScroll } from "@/components/full-screen-scroll"
 import { HackModePage } from "@/components/hack/hack-mode-page"
+import { HackPreloader } from "@/components/hack/hack-preloader"
 import { SectionFive } from "@/components/tomato/section-five"
 import { SectionFour } from "@/components/tomato/section-four"
 import { SectionOne } from "@/components/tomato/section-one"
@@ -36,7 +37,11 @@ export function App() {
   }, [])
 
   if (mode === "hack") {
-    return <HackModePage />
+    return (
+      <HackPreloader>
+        <HackModePage />
+      </HackPreloader>
+    )
   }
 
   return (

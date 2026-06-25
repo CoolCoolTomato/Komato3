@@ -97,6 +97,8 @@ export function HackAnchorOne({
       return
     }
 
+    const canvasElement = canvas
+
     const chars = [
       "0",
       "1",
@@ -135,17 +137,17 @@ export function HackAnchorOne({
       }
 
       if (clear) {
-        const ctx = canvas.getContext("2d")
+        const ctx = canvasElement.getContext("2d")
 
         if (ctx) {
           ctx.setTransform(1, 0, 0, 1, 0, 0)
-          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          ctx.clearRect(0, 0, canvasElement.width, canvasElement.height)
         }
       }
     }
 
     function buildStaticLayer() {
-      const rect = canvas.getBoundingClientRect()
+      const rect = canvasElement.getBoundingClientRect()
       const width = Math.max(1, Math.ceil(rect.width || window.innerWidth))
       const height = Math.max(1, Math.ceil(rect.height || window.innerHeight))
       const dpr = Math.min(window.devicePixelRatio || 1, 1.35)
@@ -153,8 +155,8 @@ export function HackAnchorOne({
       const pixelWidth = Math.ceil(width * dpr)
       const pixelHeight = Math.ceil(height * dpr)
 
-      canvas.width = pixelWidth
-      canvas.height = pixelHeight
+      canvasElement.width = pixelWidth
+      canvasElement.height = pixelHeight
 
       const baseCanvas = createCanvas(pixelWidth, pixelHeight)
       const glyphCanvas = createCanvas(pixelWidth, pixelHeight)
@@ -333,7 +335,7 @@ export function HackAnchorOne({
 
     function render(now: number) {
       const state = stateRef.current
-      const ctx = canvas.getContext("2d")
+      const ctx = canvasElement.getContext("2d")
 
       if (!state || !ctx) {
         rafRef.current = null
@@ -346,7 +348,7 @@ export function HackAnchorOne({
       }
 
       ctx.setTransform(1, 0, 0, 1, 0, 0)
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.clearRect(0, 0, canvasElement.width, canvasElement.height)
 
       ctx.globalCompositeOperation = "source-over"
       ctx.globalAlpha = 1
@@ -397,7 +399,7 @@ export function HackAnchorOne({
       }
     })
 
-    resizeObserver.observe(canvas)
+    resizeObserver.observe(canvasElement)
 
     const handleVisibilityChange = () => {
       if (document.hidden) {

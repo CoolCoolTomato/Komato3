@@ -1,5 +1,6 @@
 import CircularGallery from '@/components/ui/CircularGallery'
 import GlitchText from '@/components/ui/GlitchText';
+import { hackGalleryItems } from "@/components/hack/hack-assets"
 import { useEffect, useState } from "react"
 
 function useIsDesktop() {
@@ -58,6 +59,7 @@ export function HackSectionThree() {
 
       <div className='w-full h-[50%] bottom-0 absolute'>
         <CircularGallery
+          items={hackGalleryItems}
           bend={bend}
           textColor="#ff3f32"
           borderRadius={0.05}
