@@ -15,7 +15,7 @@ const snapBoundaries = [
 const parallaxFromIndex = 2
 const parallaxToIndex = 3
 
-const wheelScrollDamping = 0.2
+const wheelScrollDamping = 0.15
 const snapScrollDamping = 0.08
 
 // SectionFour 初始露出的比例
