@@ -223,15 +223,30 @@ export function AppPreloader({ children }: AppPreloaderProps) {
     }
   }, [canEnter, displayProgress])
 
-  if (state.isComplete) {
-    return children
-  }
+  useEffect(() => {
+    if (state.isComplete) {
+      return
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [state.isComplete])
 
   return (
-    <main className="grid h-svh place-items-center overflow-hidden bg-white text-[#ff3f32]">
-      <p className="text-[clamp(3.5rem,16vw,9rem)] font-black leading-none tracking-[-0.08em]">
-        {displayProgress}%
-      </p>
-    </main>
+    <>
+      {children}
+
+      {!state.isComplete ? (
+        <main className="fixed inset-0 z-[10000] grid h-svh place-items-center overflow-hidden bg-white text-[#ff3f32]">
+          <p className="text-[clamp(3.5rem,16vw,9rem)] font-black leading-none tracking-[-0.08em]">
+            {displayProgress}%
+          </p>
+        </main>
+      ) : null}
+    </>
   )
 }
