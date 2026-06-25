@@ -5,6 +5,8 @@ import { preloadImage } from "@/lib/image-cache"
 
 const minimumSplashDuration = 2400
 const preloadConcurrency = 10
+const exitAnimationDuration = 760
+const exitAnimationBuffer = 120
 const tomatoFrameCount = 137
 
 type AppPreloaderProps = {
@@ -15,7 +17,6 @@ type PreloadState = {
   loaded: number
   total: number
   failed: string[]
-  isComplete: boolean
 }
 
 const getTomatoFrameSrc = (frame: number) =>
@@ -120,12 +121,13 @@ export function AppPreloader({ children }: AppPreloaderProps) {
     loaded: preloadProgress.loaded,
     total: preloadAssets.length,
     failed: preloadProgress.failed,
-    isComplete: false,
   }))
 
   const [displayProgress, setDisplayProgress] = useState(0)
   const [targetProgress, setTargetProgress] = useState(0)
   const [canEnter, setCanEnter] = useState(false)
+  const [isExiting, setIsExiting] = useState(false)
+  const [isOverlayVisible, setIsOverlayVisible] = useState(true)
 
   const realProgress = useMemo(() => {
     if (state.total === 0) {
@@ -207,24 +209,23 @@ export function AppPreloader({ children }: AppPreloaderProps) {
   }, [displayProgress, targetProgress])
 
   useEffect(() => {
-    if (!canEnter || displayProgress < 100) {
+    if (!canEnter || displayProgress < 100 || isExiting) {
       return
     }
 
+    setIsExiting(true)
+
     const timer = window.setTimeout(() => {
-      setState((current) => ({
-        ...current,
-        isComplete: true,
-      }))
-    }, 250)
+      setIsOverlayVisible(false)
+    }, exitAnimationDuration + exitAnimationBuffer)
 
     return () => {
       window.clearTimeout(timer)
     }
-  }, [canEnter, displayProgress])
+  }, [canEnter, displayProgress, isExiting])
 
   useEffect(() => {
-    if (state.isComplete) {
+    if (!isOverlayVisible) {
       return
     }
 
@@ -234,15 +235,38 @@ export function AppPreloader({ children }: AppPreloaderProps) {
     return () => {
       document.body.style.overflow = previousOverflow
     }
-  }, [state.isComplete])
+  }, [isOverlayVisible])
 
   return (
     <>
       {children}
 
-      {!state.isComplete ? (
-        <main className="fixed inset-0 z-[10000] grid h-svh place-items-center overflow-hidden bg-white text-[#ff3f32]">
-          <p className="text-[clamp(3.5rem,16vw,9rem)] font-black leading-none tracking-[-0.08em]">
+      {isOverlayVisible ? (
+        <main
+          className="fixed inset-0 z-[10000] grid h-svh place-items-center overflow-hidden bg-white text-[#ff3f32]"
+          style={{
+            transform: isExiting
+              ? "translate3d(0, -100%, 0)"
+              : "translate3d(0, 0, 0)",
+            opacity: isExiting ? 0.96 : 1,
+            filter: isExiting ? "blur(1px)" : "blur(0)",
+            transition:
+              "transform 760ms cubic-bezier(0.76, 0, 0.24, 1), opacity 760ms ease, filter 760ms ease",
+            willChange: "transform, opacity, filter",
+          }}
+        >
+          <p
+            className="text-[clamp(3.5rem,16vw,9rem)] font-black leading-none tracking-[-0.08em]"
+            style={{
+              transform: isExiting
+                ? "translate3d(0, -2rem, 0)"
+                : "translate3d(0, 0, 0)",
+              opacity: isExiting ? 0 : 1,
+              transition:
+                "transform 500ms cubic-bezier(0.22, 1, 0.36, 1), opacity 500ms ease",
+              willChange: "transform, opacity",
+            }}
+          >
             {displayProgress}%
           </p>
         </main>

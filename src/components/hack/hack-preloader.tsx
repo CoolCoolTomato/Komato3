@@ -5,6 +5,8 @@ import { preloadImage } from "@/lib/image-cache"
 
 const minimumSplashDuration = 1800
 const preloadConcurrency = 6
+const exitAnimationDuration = 820
+const exitAnimationBuffer = 120
 
 const preloadAssets = [...hackImageAssets, ...hackFetchAssets]
 
@@ -16,7 +18,6 @@ type PreloadState = {
   loaded: number
   total: number
   failed: string[]
-  isComplete: boolean
 }
 
 let preloadPromise: Promise<string[]> | null = null
@@ -102,12 +103,13 @@ export function HackPreloader({ children }: HackPreloaderProps) {
     loaded: preloadProgress.loaded,
     total: preloadAssets.length,
     failed: preloadProgress.failed,
-    isComplete: false,
   }))
 
   const [displayProgress, setDisplayProgress] = useState(0)
   const [targetProgress, setTargetProgress] = useState(0)
   const [canEnter, setCanEnter] = useState(false)
+  const [isExiting, setIsExiting] = useState(false)
+  const [isOverlayVisible, setIsOverlayVisible] = useState(true)
 
   const realProgress = useMemo(() => {
     if (state.total === 0) {
@@ -189,24 +191,23 @@ export function HackPreloader({ children }: HackPreloaderProps) {
   }, [displayProgress, targetProgress])
 
   useEffect(() => {
-    if (!canEnter || displayProgress < 100) {
+    if (!canEnter || displayProgress < 100 || isExiting) {
       return
     }
 
+    setIsExiting(true)
+
     const timer = window.setTimeout(() => {
-      setState((current) => ({
-        ...current,
-        isComplete: true,
-      }))
-    }, 220)
+      setIsOverlayVisible(false)
+    }, exitAnimationDuration + exitAnimationBuffer)
 
     return () => {
       window.clearTimeout(timer)
     }
-  }, [canEnter, displayProgress])
+  }, [canEnter, displayProgress, isExiting])
 
   useEffect(() => {
-    if (state.isComplete) {
+    if (!isOverlayVisible) {
       return
     }
 
@@ -216,15 +217,34 @@ export function HackPreloader({ children }: HackPreloaderProps) {
     return () => {
       document.body.style.overflow = previousOverflow
     }
-  }, [state.isComplete])
+  }, [isOverlayVisible])
 
   return (
     <>
       {children}
 
-      {!state.isComplete ? (
-        <main className="fixed inset-0 z-[10000] grid h-svh place-items-center overflow-hidden bg-[#050706] text-[#ff3f32]">
-          <div className="pointer-events-none absolute inset-0 opacity-70">
+      {isOverlayVisible ? (
+        <main
+          className="fixed inset-0 z-[10000] grid h-svh place-items-center overflow-hidden bg-[#050706] text-[#ff3f32]"
+          style={{
+            transform: isExiting
+              ? "translate3d(0, -100%, 0)"
+              : "translate3d(0, 0, 0)",
+            opacity: isExiting ? 0.96 : 1,
+            filter: isExiting ? "blur(1.5px) saturate(1.5)" : "blur(0) saturate(1)",
+            transition:
+              "transform 820ms cubic-bezier(0.76, 0, 0.24, 1), opacity 820ms ease, filter 820ms ease",
+            willChange: "transform, opacity, filter",
+          }}
+        >
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              opacity: isExiting ? 0.2 : 0.7,
+              transition: "opacity 500ms ease",
+              willChange: "opacity",
+            }}
+          >
             <div className="absolute inset-x-0 top-0 h-24 border-b border-[#ff3f32]/20" />
             <div className="absolute inset-x-0 bottom-0 h-24 border-t border-[#ff3f32]/20" />
             <div className="absolute left-0 top-0 h-full w-8 border-r border-[#ff3f32]/20 md:w-16" />
@@ -233,7 +253,19 @@ export function HackPreloader({ children }: HackPreloaderProps) {
           </div>
 
           <div className="relative z-10 flex flex-col items-center gap-5">
-            <p className="text-[clamp(3.5rem,16vw,9rem)] font-black leading-none tracking-[-0.08em] drop-shadow-[0_0_24px_rgba(255,63,50,0.28)]">
+            <p
+              className="text-[clamp(3.5rem,16vw,9rem)] font-black leading-none tracking-[-0.08em] drop-shadow-[0_0_24px_rgba(255,63,50,0.28)]"
+              style={{
+                transform: isExiting
+                  ? "translate3d(0, -2rem, 0)"
+                  : "translate3d(0, 0, 0)",
+                opacity: isExiting ? 0 : 1,
+                filter: isExiting ? "blur(4px)" : "blur(0)",
+                transition:
+                  "transform 500ms cubic-bezier(0.22, 1, 0.36, 1), opacity 500ms ease, filter 500ms ease",
+                willChange: "transform, opacity, filter",
+              }}
+            >
               {displayProgress}%
             </p>
           </div>
