@@ -575,53 +575,49 @@ class App {
   ) {
     const defaultItems = [
       {
-        image: `https://picsum.photos/seed/1/800/600?grayscale`,
-        text: 'Bridge'
+        image: `/Yakit.png`,
+        text: 'Yakit'
       },
       {
-        image: `https://picsum.photos/seed/2/800/600?grayscale`,
-        text: 'Desk Setup'
+        image: `/Shodan.png`,
+        text: 'Shodan'
       },
       {
-        image: `https://picsum.photos/seed/3/800/600?grayscale`,
-        text: 'Waterfall'
+        image: `/BurpSuite.png`,
+        text: 'BurpSuite'
       },
       {
-        image: `https://picsum.photos/seed/4/800/600?grayscale`,
-        text: 'Strawberries'
+        image: `/WireShark.png`,
+        text: 'WireShark'
       },
       {
-        image: `https://picsum.photos/seed/5/800/600?grayscale`,
-        text: 'Deep Diving'
+        image: `/Fscan.png`,
+        text: 'Fscan'
       },
       {
-        image: `https://picsum.photos/seed/16/800/600?grayscale`,
-        text: 'Train Track'
+        image: `/Metasploit.png`,
+        text: 'Metasploit'
       },
       {
-        image: `https://picsum.photos/seed/17/800/600?grayscale`,
-        text: 'Santorini'
+        image: `/Nmap.png`,
+        text: 'Nmap'
       },
       {
-        image: `https://picsum.photos/seed/8/800/600?grayscale`,
-        text: 'Blurry Lights'
+        image: `/Fofa.png`,
+        text: 'Fofa'
       },
       {
-        image: `https://picsum.photos/seed/9/800/600?grayscale`,
-        text: 'New York'
+        image: `/Xray.png`,
+        text: 'Xray'
       },
       {
-        image: `https://picsum.photos/seed/10/800/600?grayscale`,
-        text: 'Good Boy'
+        image: `/WinHex.png`,
+        text: 'WinHex'
       },
       {
-        image: `https://picsum.photos/seed/21/800/600?grayscale`,
-        text: 'Coastline'
+        image: `/Cobaltstrike.png`,
+        text: 'Cobaltstrike'
       },
-      {
-        image: `https://picsum.photos/seed/12/800/600?grayscale`,
-        text: 'Palm Trees'
-      }
     ];
     const galleryItems = items && items.length ? items : defaultItems;
     this.mediasImages = galleryItems.concat(galleryItems);
