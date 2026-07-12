@@ -28,6 +28,8 @@ const sectionFourInitialRevealRatio = 0.5
 
 // SectionFour 离场时保留在视口中的比例
 const sectionFourExitRetentionRatio = 0.5
+const sectionFourOverlayMaxOpacity = 0.5
+const sectionFourOverlayTransparentThreshold = 0.2
 
 type FullScreenScrollProps = {
   children: ReactNode
@@ -77,6 +79,7 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
 
       if (sectionFour) {
         sectionFour.style.transform = ""
+        sectionFour.style.removeProperty("--section-four-overlay-opacity")
       }
     }
 
@@ -109,6 +112,23 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
         1,
       )
       const isExitingSectionFour = scrollTop >= exitStart && scrollTop <= exitEnd
+      const adjacentSectionRatio = isEnteringSectionFour
+        ? 1 - entryProgress
+        : isExitingSectionFour
+          ? exitProgress
+          : 0
+      const overlayOpacity =
+        (Math.max(
+          adjacentSectionRatio - sectionFourOverlayTransparentThreshold,
+          0,
+        ) /
+          (1 - sectionFourOverlayTransparentThreshold)) *
+        sectionFourOverlayMaxOpacity
+
+      sectionFour.style.setProperty(
+        "--section-four-overlay-opacity",
+        overlayOpacity.toString(),
+      )
 
       if (isEnteringSectionFour) {
         const initialOffset = viewportHeight * sectionFourInitialRevealRatio
@@ -375,6 +395,13 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
             ].join(" ")}
           >
             {section}
+            {index === sectionFourIndex ? (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 z-50 bg-black"
+                style={{ opacity: "var(--section-four-overlay-opacity, 0)" }}
+              />
+            ) : null}
           </section>
         ))}
       </div>
