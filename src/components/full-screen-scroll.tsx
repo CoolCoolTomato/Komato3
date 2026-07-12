@@ -9,11 +9,15 @@ const snapBoundaries = [
   [2, 3],
   [3, 4],
   [4, 5],
+  [5, 6],
 ] as const
 
 // SectionThree -> SectionFour 视差区间
-const parallaxFromIndex = 2
-const parallaxToIndex = 3
+const sectionThreeIndex = 2
+const sectionFourIndex = 3
+
+// SectionFour -> SectionFive 覆盖区间
+const sectionFiveIndex = 4
 
 const wheelScrollDamping = 0.15
 const snapScrollDamping = 0.08
@@ -21,6 +25,9 @@ const snapScrollDamping = 0.08
 // SectionFour 初始露出的比例
 // 0.5 = 起始时露出半屏
 const sectionFourInitialRevealRatio = 0.5
+
+// SectionFour 离场时保留在视口中的比例
+const sectionFourExitRetentionRatio = 0.5
 
 type FullScreenScrollProps = {
   children: ReactNode
@@ -51,7 +58,7 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
   useEffect(() => {
     const container = containerRef.current
 
-    if (!container || sections.length <= parallaxToIndex) {
+    if (!container || sections.length <= sectionFiveIndex) {
       return
     }
 
@@ -66,7 +73,7 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
       Math.max(container.scrollHeight - container.clientHeight, 0)
 
     const resetParallax = () => {
-      const sectionFour = sectionRefs.current[parallaxToIndex]
+      const sectionFour = sectionRefs.current[sectionFourIndex]
 
       if (sectionFour) {
         sectionFour.style.transform = ""
@@ -74,50 +81,50 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
     }
 
     const updateParallax = () => {
-      const sectionThree = sectionRefs.current[parallaxFromIndex]
-      const sectionFour = sectionRefs.current[parallaxToIndex]
+      const sectionThree = sectionRefs.current[sectionThreeIndex]
+      const sectionFour = sectionRefs.current[sectionFourIndex]
+      const sectionFive = sectionRefs.current[sectionFiveIndex]
 
-      if (!sectionThree || !sectionFour) {
+      if (!sectionThree || !sectionFour || !sectionFive) {
         return
       }
 
       const viewportHeight = container.clientHeight
       const scrollTop = container.scrollTop
 
-      const start = sectionThree.offsetTop
-      const end = sectionFour.offsetTop
+      const entryStart = sectionThree.offsetTop
+      const entryEnd = sectionFour.offsetTop
+      const entryProgress = Math.min(
+        Math.max((scrollTop - entryStart) / Math.max(entryEnd - entryStart, 1), 0),
+        1,
+      )
+      const isEnteringSectionFour =
+        scrollTop >= entryStart && scrollTop <= entryEnd
 
-      const rawProgress = (scrollTop - start) / Math.max(end - start, 1)
-      const progress = Math.min(Math.max(rawProgress, 0), 1)
+      const exitStart =
+        sectionFour.offsetTop + sectionFour.offsetHeight - viewportHeight
+      const exitEnd = sectionFive.offsetTop
+      const exitProgress = Math.min(
+        Math.max((scrollTop - exitStart) / Math.max(exitEnd - exitStart, 1), 0),
+        1,
+      )
+      const isExitingSectionFour = scrollTop >= exitStart && scrollTop <= exitEnd
 
-      const isInTransition = scrollTop >= start && scrollTop <= end
-
-      if (!isInTransition) {
-        resetParallax()
+      if (isEnteringSectionFour) {
+        const initialOffset = viewportHeight * sectionFourInitialRevealRatio
+        sectionFour.style.transform = `translate3d(0, ${-(1 - entryProgress) * initialOffset}px, 0)`
         return
       }
 
-      /*
-        正常滚动时：
-        - progress = 0，Section4 原本在屏幕下方，完全不可见
-        - progress = 1，Section4 正好完全进入屏幕
+      if (isExitingSectionFour) {
+        const retentionOffset =
+          viewportHeight * sectionFourExitRetentionRatio * exitProgress
+        sectionFour.style.transform = `translate3d(0, ${retentionOffset}px, 0)`
+        return
+      }
 
-        现在要的效果：
-        - progress = 0，Section4 已经露出一半
-        - progress = 1，Section4 正好完全进入屏幕
-
-        所以只移动 Section4：
-        - 初始向上移动 50vh
-        - 随着 progress 增加，逐渐回到 0
-      */
-      const initialOffset =
-        viewportHeight * sectionFourInitialRevealRatio
-
-      const translateY = -(1 - progress) * initialOffset
-
-      sectionFour.style.transform = `translate3d(0, ${translateY}px, 0)`
+      resetParallax()
     }
-
     const startDampedScroll = () => {
       if (scrollAnimationFrameRef.current) {
         return
@@ -356,11 +363,14 @@ export function FullScreenScroll({ children }: FullScreenScrollProps) {
               isCompactSection(section)
                 ? "w-full shrink-0"
                 : "min-h-svh w-full shrink-0 [&>*]:min-h-svh",
-              index === parallaxFromIndex
+              index === sectionThreeIndex
                 ? "relative z-20"
                 : "",
-              index === parallaxToIndex
+              index === sectionFourIndex
                 ? "relative z-10 bg-background will-change-transform"
+                : "",
+              index === sectionFiveIndex
+                ? "relative z-30 bg-white"
                 : "",
             ].join(" ")}
           >

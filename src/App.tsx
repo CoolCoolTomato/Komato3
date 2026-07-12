@@ -6,6 +6,7 @@ import { HackEntrySection } from "@/components/tomato/hack-entry-section"
 import { SectionFive } from "@/components/tomato/section-five"
 import { SectionFour } from "@/components/tomato/section-four"
 import { SectionOne } from "@/components/tomato/section-one"
+import { SectionSix } from "@/components/tomato/section-six"
 import { SectionThree } from "@/components/tomato/section-three"
 import { SectionTwo } from "@/components/tomato/section-two"
 import { useEffect, useState } from "react"
@@ -53,6 +54,7 @@ export function App() {
         <SectionThree />
         <SectionFour />
         <SectionFive />
+        <SectionSix />
         <HackEntrySection compactScrollSection />
       </FullScreenScroll>
     </AppPreloader>
