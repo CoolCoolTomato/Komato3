@@ -28,6 +28,9 @@ const imageAssets = [
   "/2024.png",
   "/2025.png",
   "/2026.png",
+  "/LearnLang.png",
+  "/MatoEditor.png",
+  "/WhiteBlog.png",
   "/blog.png",
   ...Array.from({ length: tomatoFrameCount }, (_, index) =>
     getTomatoFrameSrc(index + 1),
