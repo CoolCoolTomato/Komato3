@@ -16,36 +16,28 @@ type ProductItem =
 
 const products: ProductItem[] = [
   {
-    src: "/2024.png",
-    alt: "Product preview 2024",
-    label: "Product 01",
-    title: "Product Lab",
+    src: "/LearnLang.png",
+    alt: "LearnLang AI language learning platform interface",
+    label: "AI Learning",
+    title: "LearnLang",
     description:
-      "Tools, experiments, and small systems built to make ideas tangible.",
+      "An AI-powered language learning platform that turns conversations, vocabulary, and personalized feedback into a focused learning experience.",
   },
   {
-    src: "/2025.png",
-    alt: "Product preview 2025",
-    label: "Product 02",
-    title: "Visual System",
+    src: "/MatoEditor.png",
+    alt: "MatoEditor minimalist Markdown editor interface",
+    label: "Writing Tool",
+    title: "MatoEditor",
     description:
-      "Interactive visual systems combining motion, code, and structured experimentation.",
+      "A clean and distraction-free Markdown editor designed for fast writing, real-time preview, and effortless content organization.",
   },
   {
-    src: "/2026.png",
-    alt: "Product preview 2026",
-    label: "Product 03",
-    title: "Digital Object",
+    src: "/WhiteBlog.png",
+    alt: "WhiteBlog minimalist personal blog interface",
+    label: "Digital Publishing",
+    title: "WhiteBlog",
     description:
-      "Digital objects shaped through interfaces, real-time graphics, and technical research.",
-  },
-  {
-    src: "/2023.png",
-    alt: "Product preview 2027",
-    label: "Product 04",
-    title: "Future Study",
-    description:
-      "Ongoing studies exploring new forms of software, interaction, and visual communication.",
+      "A minimalist publishing platform built around thoughtful typography, structured content, and a refined reading experience.",
   },
 ]
 
