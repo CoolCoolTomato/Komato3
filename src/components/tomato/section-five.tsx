@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react"
 import { useRef, useState } from "react"
 
 import {
@@ -12,6 +13,7 @@ type ProductItem = ProductRevealImage & {
   label: string
   title: string
   description: string
+  href: string
 }
 
 const products: ProductItem[] = [
@@ -20,6 +22,7 @@ const products: ProductItem[] = [
     alt: "LearnLang AI language learning platform interface",
     label: "AI Learning",
     title: "LearnLang",
+    href: "https://github.com/CoolCoolTomato/LearnLang",
     description:
       "An AI-powered language learning platform that turns conversations, vocabulary, and personalized feedback into a focused learning experience.",
   },
@@ -28,6 +31,7 @@ const products: ProductItem[] = [
     alt: "MatoEditor minimalist Markdown editor interface",
     label: "Writing Tool",
     title: "MatoEditor",
+    href: "https://github.com/CoolCoolTomato/MatoEditor",
     description:
       "A clean and distraction-free Markdown editor designed for fast writing, real-time preview, and effortless content organization.",
   },
@@ -36,6 +40,7 @@ const products: ProductItem[] = [
     alt: "WhiteBlog minimalist personal blog interface",
     label: "Digital Publishing",
     title: "WhiteBlog",
+    href: "https://github.com/CoolCoolTomato/WhiteBlog",
     description:
       "A minimalist publishing platform built around thoughtful typography, structured content, and a refined reading experience.",
   },
@@ -95,10 +100,22 @@ export function SectionFive() {
             <p className="relative z-10 mb-4 text-xs font-black tracking-[0.2em] uppercase md:text-sm">
               {activeProduct.label}
             </p>
+            <a
+              href={activeProduct.href}
+              target="_blank"
+              rel="noreferrer"
+              className="group inline-flex max-w-full flex-col text-inherit no-underline focus-visible:outline-none"
+              aria-label={`Explore ${activeProduct.title}`}
+            >
+              <h2 className="max-w-[7ch] text-[clamp(2rem,5vw,5rem)] leading-[0.9] font-black tracking-[-0.055em]">
+                {activeProduct.title}
+              </h2>
 
-            <h2 className="relative z-10 max-w-[7ch] text-[clamp(2rem,5vw,5rem)] leading-[0.9] font-black tracking-[-0.055em]">
-              {activeProduct.title}
-            </h2>
+              <span className="mt-3 flex translate-y-1 items-center gap-2 text-xs font-black tracking-[0.18em] uppercase opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+                Explore
+                <ArrowUpRight className="size-3" strokeWidth={2.5} />
+              </span>
+            </a>
           </div>
 
           <p
