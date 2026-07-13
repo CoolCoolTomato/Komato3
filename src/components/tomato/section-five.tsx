@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import {
   ProductRevealFrame,
@@ -6,13 +6,13 @@ import {
   productSwitchScrollVh,
   type ProductRevealImage,
 } from "@/components/tomato/product-reveal-frame"
+import Crosshair from "@/components/ui/Crosshair"
 
-type ProductItem =
-  ProductRevealImage & {
-    label: string
-    title: string
-    description: string
-  }
+type ProductItem = ProductRevealImage & {
+  label: string
+  title: string
+  description: string
+}
 
 const products: ProductItem[] = [
   {
@@ -42,17 +42,12 @@ const products: ProductItem[] = [
 ]
 
 export function SectionFive() {
-  const [activeIndex, setActiveIndex] =
-    useState(0)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const infoPanelRef = useRef<HTMLDivElement>(null)
 
-  const activeProduct =
-    products[activeIndex] ??
-    products[0]
+  const activeProduct = products[activeIndex] ?? products[0]
 
-  const transitionCount = Math.max(
-    products.length - 1,
-    0,
-  )
+  const transitionCount = Math.max(products.length - 1, 0)
 
   /**
    * 100svh：sticky 本身占据的视口高度。
@@ -60,10 +55,7 @@ export function SectionFive() {
    * 每次切换 120svh：100svh dither + 20svh 静止。
    */
   const sectionHeightVh =
-    100 +
-    productInitialRestScrollVh +
-    transitionCount *
-      productSwitchScrollVh
+    100 + productInitialRestScrollVh + transitionCount * productSwitchScrollVh
 
   return (
     <section
@@ -73,47 +65,45 @@ export function SectionFive() {
         height: `${sectionHeightVh}svh`,
       }}
     >
-      <div className="sticky top-0 grid h-svh grid-cols-[70%_30%] overflow-hidden border-y border-[#ff3f32]/55 bg-white">
-        <div className="min-h-0 min-w-0 border-r border-[#ff3f32]/55">
+      <div className="sticky top-0 grid h-svh grid-rows-[60%_40%] overflow-hidden border-y border-[#ff3f32]/55 bg-white md:grid-cols-[70%_30%] md:grid-rows-none">
+        <div className="min-h-0 min-w-0 border-b border-[#ff3f32]/55 md:border-r md:border-b-0">
           <ProductRevealFrame
             images={products}
-            onActiveIndexChange={
-              setActiveIndex
-            }
+            onActiveIndexChange={setActiveIndex}
           />
         </div>
 
-        <div className="flex min-h-0 min-w-0 flex-col justify-between px-6 py-7 md:px-10 md:py-10">
-          <div className="flex items-start justify-between">
+        <div
+          ref={infoPanelRef}
+          className="relative flex min-h-0 min-w-0 flex-col justify-between overflow-hidden px-6 py-7 md:px-10 md:py-10"
+        >
+          <Crosshair containerRef={infoPanelRef} color="#ff3f32" />
+          <div className="relative z-10 flex items-start justify-between">
             <div className="h-2 w-16 bg-[#ff3f32] md:h-3 md:w-24" />
 
             <p className="text-xs font-black tracking-[0.16em]">
-              {String(
-                activeIndex + 1,
-              ).padStart(2, "0")}
+              {String(activeIndex + 1).padStart(2, "0")}
               {" / "}
-              {String(
-                products.length,
-              ).padStart(2, "0")}
+              {String(products.length).padStart(2, "0")}
             </p>
           </div>
 
           <div
             key={`title-${activeIndex}`}
-            className="animate-[product-text-enter_500ms_cubic-bezier(0.22,1,0.36,1)]"
+            className="relative z-10 animate-[product-text-enter_500ms_cubic-bezier(0.22,1,0.36,1)]"
           >
-            <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] md:text-sm">
+            <p className="relative z-10 mb-4 text-xs font-black tracking-[0.2em] uppercase md:text-sm">
               {activeProduct.label}
             </p>
 
-            <h2 className="max-w-[7ch] text-[clamp(2.5rem,7vw,7.5rem)] font-black leading-[0.9] tracking-[-0.055em]">
+            <h2 className="relative z-10 max-w-[7ch] text-[clamp(2rem,5vw,5rem)] leading-[0.9] font-black tracking-[-0.055em]">
               {activeProduct.title}
             </h2>
           </div>
 
           <p
             key={`description-${activeIndex}`}
-            className="max-w-[18ch] animate-[product-text-enter_500ms_cubic-bezier(0.22,1,0.36,1)] text-[clamp(1rem,2vw,2rem)] font-medium leading-[1.12] tracking-[-0.045em]"
+            className="relative z-10 max-w-[18ch] animate-[product-text-enter_500ms_cubic-bezier(0.22,1,0.36,1)] text-[clamp(1rem,2vw,2rem)] leading-[1.12] font-medium tracking-[-0.045em]"
           >
             {activeProduct.description}
           </p>
