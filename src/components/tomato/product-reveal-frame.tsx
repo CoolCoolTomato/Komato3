@@ -12,13 +12,13 @@ const switchDamping = 0.14
 /**
  * 首图井字框完全展开后，先保留一段静止滚动距离。
  */
-export const productInitialRestScrollVh = 70
+export const productInitialRestScrollVh = 50
 
 /**
  * 每张图片切换占用 120svh：
  * 前 100svh 播放 dither，后 20svh 保持静止。
  */
-export const productSwitchScrollVh = 170
+export const productSwitchScrollVh = 150
 
 const productDitherScrollVh = 100
 
