@@ -80,12 +80,12 @@ function ProductRow({ product, index, total }: ProductRowProps) {
   return (
     <article
       data-product-reveal-section
-      className="relative border-t border-[#ff3f32]/55 bg-white"
+      className="relative bg-white"
       style={{ height: `${sectionHeightVh}svh` }}
     >
       <div
         className={[
-          "sticky top-0 z-20 grid h-svh grid-rows-[40%_60%] overflow-hidden md:grid-rows-none",
+          "sticky top-0 z-20 grid h-svh grid-rows-[40%_60%] overflow-hidden border-t border-[#ff3f32]/55 md:grid-rows-none",
           isReversed ? "md:grid-cols-[30%_70%]" : "md:grid-cols-[70%_30%]",
         ].join(" ")}
       >
