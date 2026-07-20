@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react"
 import { useRef } from "react"
 
 import {
+  ProductRevealCanvas,
   ProductRevealFrame,
   productInitialRestScrollVh,
   productSwitchScrollVh,
@@ -84,16 +85,14 @@ function ProductRow({ product, index, total }: ProductRowProps) {
     >
       <div
         className={[
-          "sticky top-0 grid h-svh grid-rows-[40%_60%] overflow-hidden bg-white md:grid-rows-none",
+          "sticky top-0 z-20 grid h-svh grid-rows-[40%_60%] overflow-hidden md:grid-rows-none",
           isReversed ? "md:grid-cols-[30%_70%]" : "md:grid-cols-[70%_30%]",
         ].join(" ")}
       >
         <div
           className={[
             "order-2 min-h-0 min-w-0 border-t border-[#ff3f32]/55 md:border-t-0",
-            isReversed
-              ? "md:order-2 md:border-l"
-              : "md:order-1 md:border-r",
+            isReversed ? "md:order-2 md:border-l" : "md:order-1 md:border-r",
           ].join(" ")}
         >
           <ProductRevealFrame images={product.images} />
@@ -102,7 +101,7 @@ function ProductRow({ product, index, total }: ProductRowProps) {
         <div
           ref={infoPanelRef}
           className={[
-            "relative flex min-h-0 min-w-0 flex-col justify-between overflow-hidden px-6 py-7 md:px-10 md:py-10",
+            "relative flex min-h-0 min-w-0 flex-col justify-between overflow-hidden bg-white px-6 py-7 md:px-10 md:py-10",
             isReversed ? "order-1 md:order-1" : "order-1 md:order-2",
           ].join(" ")}
         >
@@ -156,14 +155,16 @@ export function SectionFive() {
       className="relative border-b border-[#ff3f32]/55 bg-white pb-px text-[#ff3f32]"
       aria-label="Products"
     >
-      {products.map((product, index) => (
-        <ProductRow
-          key={product.title}
-          product={product}
-          index={index}
-          total={products.length}
-        />
-      ))}
+      <ProductRevealCanvas className="relative">
+        {products.map((product, index) => (
+          <ProductRow
+            key={product.title}
+            product={product}
+            index={index}
+            total={products.length}
+          />
+        ))}
+      </ProductRevealCanvas>
     </section>
   )
 }
