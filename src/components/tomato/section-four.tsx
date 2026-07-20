@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react"
-import WebGLBlurImage from "./web-gl-blue-img"
+import { SharedWebGLBlurCanvas, SharedWebGLBlurImage } from "./web-gl-blue-img"
 
 const works = [
-    {
+  {
     title: "Project 05",
     year: "2026",
     imageSrc: "/2026.png",
     description: "The latest personal landing page",
   },
-    {
+  {
     title: "Project 04",
     year: "2025",
     imageSrc: "/2025.png",
@@ -59,7 +59,7 @@ export function SectionFour() {
 
   const maxShiftRef = useRef(0)
 
-  const [isDesktop, setIsDesktop] = useState(false)
+  const [isDesktop, setIsDesktop] = useState<boolean | null>(null)
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 768px)")
@@ -112,10 +112,10 @@ export function SectionFour() {
       const scrollTop = scrollParent.scrollTop
 
       const start = scrollSection.offsetTop
-      const end = scrollSection.offsetTop + scrollSection.offsetHeight - viewportHeight
+      const end =
+        scrollSection.offsetTop + scrollSection.offsetHeight - viewportHeight
 
-      const rawProgress =
-        end <= start ? 0 : (scrollTop - start) / (end - start)
+      const rawProgress = end <= start ? 0 : (scrollTop - start) / (end - start)
 
       const progress = Math.min(1, Math.max(0, rawProgress))
       const translateX = -progress * maxShiftRef.current
@@ -152,165 +152,165 @@ export function SectionFour() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-white border-t border-b border-[#ff3f32]/55"
+      className="relative border-t border-b border-[#ff3f32]/55 bg-white"
       style={{
-        height: isDesktop ? `${Math.max(works.length, 2) * 100}svh` : "auto",
+        height:
+          isDesktop === true ? `${Math.max(works.length, 2) * 100}svh` : "auto",
       }}
     >
       {/* Desktop */}
-      <div className="hidden md:sticky md:top-0 md:block md:h-svh md:overflow-hidden bg-white">
-        <main className="relative z-10 grid h-full grid-cols-[33%_1fr]">
-          <div className="flex min-h-0 flex-col justify-between border-r border-[#ff3f32]/55 px-7 pb-11 pt-8">
-            <div className="h-3 w-24 bg-[#ff3f32]" />
+      {isDesktop === true ? (
+        <div className="sticky top-0 h-svh overflow-hidden bg-white">
+          <main className="relative z-10 grid h-full grid-cols-[33%_1fr]">
+            <div className="flex min-h-0 flex-col justify-between border-r border-[#ff3f32]/55 px-7 pt-8 pb-11">
+              <div className="h-3 w-24 bg-[#ff3f32]" />
 
-            <div className="text-[#ff3f32]">
-              <p className="mb-6 text-sm font-black uppercase tracking-[0.22em]">
-                History
-              </p>
+              <div className="text-[#ff3f32]">
+                <p className="mb-6 text-sm font-black tracking-[0.22em] uppercase">
+                  History
+                </p>
 
-              <h2 className="max-w-[7ch] text-[clamp(4.4rem,7vw,8.7rem)] font-black leading-[0.9] tracking-[-0.055em]">
-                Archive
-              </h2>
+                <h2 className="max-w-[7ch] text-[clamp(4.4rem,7vw,8.7rem)] leading-[0.9] font-black tracking-[-0.055em]">
+                  Archive
+                </h2>
+              </div>
+
+              <div className="text-[#ff3f32]">
+                <p className="max-w-[13ch] text-[clamp(2rem,2.15vw,2.65rem)] leading-[1.12] font-medium tracking-[-0.05em]">
+                  My personal homepage history from 2022 to 2026.
+                </p>
+              </div>
             </div>
 
-            <div className="text-[#ff3f32]">
-              <p className="max-w-[13ch] text-[clamp(2rem,2.15vw,2.65rem)] font-medium leading-[1.12] tracking-[-0.05em]">
-                My personal homepage history from 2022 to 2026.
-              </p>
-
-            </div>
-          </div>
-
-          <div
-            ref={stageRef}
-            className="relative flex min-w-0 items-center overflow-hidden"
-          >
-            <div
-              ref={trackRef}
-              className="flex h-full w-max items-center will-change-transform"
+            <SharedWebGLBlurCanvas
+              containerRef={stageRef}
+              className="relative flex min-w-0 items-center overflow-hidden"
             >
-              {works.map((work) => (
-                <div
-                  key={work.title}
-                  className="h-full flex flex-row items-center"
-                >
-                  <div className="w-10 h-[calc(min(73svh,52vw)+2px)] border-t border-b border-[#ff3f32]/55">
-
-                  </div>
-                  <div className="h-full border-l border-r border-[#ff3f32]/55 flex items-center">
-                    <article
-                      className="grid w-[min(58svh,42vw)] flex-none grid-rows-[1fr_auto] overflow-hidden border-t border-b border-[#ff3f32]/55 bg-white"
-                    >
-                      <div className="relative aspect-square overflow-hidden">
-                        <WebGLBlurImage
-                          src={work.imageSrc}
-                          alt={work.title}
-                          className="h-full w-full object-cover cursor-zoom-in"
-                          pixelSize={16}
-                          blurStrength={3.5}
-                          glassStrength={0.3}
-                          noiseStrength={0.1}
-                          noiseScale={520}
-                          revealRadius={0.14}
-                          revealSoftness={0.18}
-                          objectFit="cover"
-                        />
-                      </div>
-
-                      <div className="border-t h-[min(15svh,10vw)] border-[#ff3f32]/55 p-6 text-[#ff3f32]">
-                        <div className="mb-4 flex items-center justify-between gap-6">
-                          <h3 className="text-2xl font-black uppercase tracking-[-0.04em]">
-                            {work.title}
-                          </h3>
-
-                          <span className="text-sm font-black uppercase tracking-[0.22em]">
-                            {work.year}
-                          </span>
+              <div
+                ref={trackRef}
+                className="flex h-full w-max items-center will-change-transform"
+              >
+                {works.map((work) => (
+                  <div
+                    key={work.title}
+                    className="flex h-full flex-row items-center"
+                  >
+                    <div className="h-[calc(min(73svh,52vw)+2px)] w-10 border-t border-b border-[#ff3f32]/55"></div>
+                    <div className="flex h-full items-center border-r border-l border-[#ff3f32]/55">
+                      <article className="grid w-[min(58svh,42vw)] flex-none grid-rows-[1fr_auto] overflow-hidden border-t border-b border-[#ff3f32]/55 bg-white">
+                        <div className="relative aspect-square overflow-hidden">
+                          <SharedWebGLBlurImage
+                            src={work.imageSrc}
+                            alt={work.title}
+                            className="h-full w-full cursor-zoom-in object-cover"
+                            pixelSize={16}
+                            blurStrength={3.5}
+                            glassStrength={0.3}
+                            noiseStrength={0.1}
+                            noiseScale={520}
+                            revealRadius={0.14}
+                            revealSoftness={0.18}
+                            objectFit="cover"
+                          />
                         </div>
 
-                        <p className="max-w-[28ch] text-base font-medium leading-snug tracking-[-0.03em]">
-                          {work.description}
-                        </p>
-                      </div>
-                    </article>
+                        <div className="h-[min(15svh,10vw)] border-t border-[#ff3f32]/55 p-6 text-[#ff3f32]">
+                          <div className="mb-4 flex items-center justify-between gap-6">
+                            <h3 className="text-2xl font-black tracking-[-0.04em] uppercase">
+                              {work.title}
+                            </h3>
+
+                            <span className="text-sm font-black tracking-[0.22em] uppercase">
+                              {work.year}
+                            </span>
+                          </div>
+
+                          <p className="max-w-[28ch] text-base leading-snug font-medium tracking-[-0.03em]">
+                            {work.description}
+                          </p>
+                        </div>
+                      </article>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </main>
-      </div>
+                ))}
+              </div>
+            </SharedWebGLBlurCanvas>
+          </main>
+        </div>
+      ) : null}
 
       {/* Mobile */}
-      <div className="md:hidden bg-white">
-        <div className="border-b border-[#ff3f32]/55 px-6 pb-8 pt-7 text-[#ff3f32]">
-          <div className="mb-16 h-3 w-24 bg-[#ff3f32]" />
-
-          <p className="mb-5 text-sm font-black uppercase tracking-[0.22em]">
-            History
-          </p>
-
-          <h2 className="max-w-[7ch] text-[clamp(3.9rem,19vw,6rem)] font-black leading-[0.9] tracking-[-0.055em]">
-            Archive
-          </h2>
-
-          <p className="mt-10 max-w-[18ch] text-[clamp(1.45rem,7vw,2.15rem)] font-medium leading-[1.12] tracking-[-0.05em]">
-            My personal homepage history from 2022 to 2026.
-          </p>
-        </div>
-
+      {isDesktop === false ? (
         <div className="bg-white">
-          {works.map((work) => (
-            <div key={work.title} className="flex flex-col">
-              <div className="flex h-8 border-b border-[#ff3f32]/55">
-                <div className="w-6 border-r border-[#ff3f32]/55" />
-                <div className="flex-1" />
-                <div className="w-6 border-l border-[#ff3f32]/55" />
-              </div>
+          <div className="border-b border-[#ff3f32]/55 px-6 pt-7 pb-8 text-[#ff3f32]">
+            <div className="mb-16 h-3 w-24 bg-[#ff3f32]" />
 
-              <div className="flex flex-row items-stretch">
-                <div className="w-6 flex-none border-b border-r border-[#ff3f32]/55" />
+            <p className="mb-5 text-sm font-black tracking-[0.22em] uppercase">
+              History
+            </p>
 
-                <article className="grid min-w-0 flex-1 grid-rows-[auto_auto] overflow-hidden border-b border-[#ff3f32]/55 bg-white text-[#ff3f32]">
-                  <div className="relative aspect-square overflow-hidden">
-                    <WebGLBlurImage
-                      src={work.imageSrc}
-                      alt={work.title}
-                      className="h-full w-full object-cover cursor-zoom-in"
-                      pixelSize={16}
-                      blurStrength={3.5}
-                      glassStrength={0.3}
-                      noiseStrength={0.1}
-                      noiseScale={520}
-                      revealRadius={0.14}
-                      revealSoftness={0.18}
-                      objectFit="cover"
-                    />
-                  </div>
+            <h2 className="max-w-[7ch] text-[clamp(3.9rem,19vw,6rem)] leading-[0.9] font-black tracking-[-0.055em]">
+              Archive
+            </h2>
 
-                  <div className="border-t border-[#ff3f32]/55 px-6 py-6 text-[#ff3f32]">
-                    <div className="mb-4 flex items-center justify-between gap-6">
-                      <h3 className="text-2xl font-black uppercase tracking-[-0.04em]">
-                        {work.title}
-                      </h3>
+            <p className="mt-10 max-w-[18ch] text-[clamp(1.45rem,7vw,2.15rem)] leading-[1.12] font-medium tracking-[-0.05em]">
+              My personal homepage history from 2022 to 2026.
+            </p>
+          </div>
 
-                      <span className="text-sm font-black uppercase tracking-[0.22em]">
-                        {work.year}
-                      </span>
+          <SharedWebGLBlurCanvas className="relative bg-white">
+            {works.map((work) => (
+              <div key={work.title} className="flex flex-col">
+                <div className="flex h-8 border-b border-[#ff3f32]/55">
+                  <div className="w-6 border-r border-[#ff3f32]/55" />
+                  <div className="flex-1" />
+                  <div className="w-6 border-l border-[#ff3f32]/55" />
+                </div>
+
+                <div className="flex flex-row items-stretch">
+                  <div className="w-6 flex-none border-r border-b border-[#ff3f32]/55" />
+
+                  <article className="grid min-w-0 flex-1 grid-rows-[auto_auto] overflow-hidden border-b border-[#ff3f32]/55 bg-white text-[#ff3f32]">
+                    <div className="relative aspect-square overflow-hidden">
+                      <SharedWebGLBlurImage
+                        src={work.imageSrc}
+                        alt={work.title}
+                        className="h-full w-full cursor-zoom-in object-cover"
+                        pixelSize={16}
+                        blurStrength={3.5}
+                        glassStrength={0.3}
+                        noiseStrength={0.1}
+                        noiseScale={520}
+                        revealRadius={0.14}
+                        revealSoftness={0.18}
+                        objectFit="cover"
+                      />
                     </div>
 
-                    <p className="max-w-[28ch] text-base font-medium leading-snug tracking-[-0.03em]">
-                      {work.description}
-                    </p>
-                  </div>
-                </article>
+                    <div className="border-t border-[#ff3f32]/55 px-6 py-6 text-[#ff3f32]">
+                      <div className="mb-4 flex items-center justify-between gap-6">
+                        <h3 className="text-2xl font-black tracking-[-0.04em] uppercase">
+                          {work.title}
+                        </h3>
 
-                <div className="w-6 flex-none border-b border-l border-[#ff3f32]/55" />
+                        <span className="text-sm font-black tracking-[0.22em] uppercase">
+                          {work.year}
+                        </span>
+                      </div>
+
+                      <p className="max-w-[28ch] text-base leading-snug font-medium tracking-[-0.03em]">
+                        {work.description}
+                      </p>
+                    </div>
+                  </article>
+
+                  <div className="w-6 flex-none border-b border-l border-[#ff3f32]/55" />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </SharedWebGLBlurCanvas>
         </div>
-      </div>
+      ) : null}
     </section>
   )
 }
