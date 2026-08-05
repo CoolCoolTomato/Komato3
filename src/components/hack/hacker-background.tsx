@@ -64,7 +64,7 @@ function HackerModel({ progress }: { progress: number }) {
       }
 
       child.material = new MeshLambertMaterial({
-        color: new Color("#502828"),
+        color: new Color("#603737"),
       })
 
       child.castShadow = false
